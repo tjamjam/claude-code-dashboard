@@ -22,6 +22,7 @@ mac:
   extendInfo:
     ITSAppUsesNonExemptEncryption: false
     ElectronTeamID: 22RP33YBSZ
+    LSMinimumSystemVersion: "12.0"
 
 dmg:
   title: Claude Code Dashboard
