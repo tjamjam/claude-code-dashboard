@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy — Claude Code Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+      background: #f9fafb; color: #1f2937;
+      line-height: 1.7; padding: 48px 24px;
+    }
+    .container { max-width: 640px; margin: 0 auto; }
+    h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+    .subtitle { font-size: 14px; color: #6b7280; margin-bottom: 32px; }
+    h2 { font-size: 16px; font-weight: 600; margin: 28px 0 8px; }
+    p, li { font-size: 14px; color: #374151; margin-bottom: 12px; }
+    ul { padding-left: 20px; }
+    li { margin-bottom: 6px; }
+    a { color: #2D56D2; }
+    .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #9ca3af; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Privacy Policy</h1>
+    <p class="subtitle">Claude Code Dashboard &mdash; Last updated April 14, 2026</p>
+
+    <h2>Overview</h2>
+    <p>Claude Code Dashboard is a local desktop application that reads configuration files from your computer to display them in a visual interface. Your privacy is straightforward: <strong>we collect nothing</strong>.</p>
+
+    <h2>Data Collection</h2>
+    <p>Claude Code Dashboard does <strong>not</strong> collect, transmit, store, or share any personal data. Specifically:</p>
+    <ul>
+      <li>No analytics or telemetry</li>
+      <li>No network requests to external servers</li>
+      <li>No user accounts or authentication</li>
+      <li>No cookies, tracking pixels, or advertising</li>
+      <li>No crash reporting sent externally</li>
+    </ul>
+
+    <h2>Local Data Access</h2>
+    <p>The app reads files on your local filesystem to display your Claude Code configuration:</p>
+    <ul>
+      <li><code>~/.claude/</code> &mdash; global Claude Code settings, skills, agents, commands, memory, and plans</li>
+      <li><code>~/Documents/GitHub/</code> &mdash; repository-level Claude Code configurations</li>
+    </ul>
+    <p>All data stays on your machine. Nothing is sent over the network. The app writes to your filesystem only when you explicitly toggle a permission setting, which modifies <code>~/.claude/settings.json</code>.</p>
+
+    <h2>Third-Party Services</h2>
+    <p>Claude Code Dashboard does not integrate with or send data to any third-party services. The app loads one external resource: the Inter font from Google Fonts, which is subject to <a href="https://policies.google.com/privacy">Google's Privacy Policy</a>.</p>
+
+    <h2>Children's Privacy</h2>
+    <p>This app is not directed at children under 13 and does not knowingly collect information from children.</p>
+
+    <h2>Changes to This Policy</h2>
+    <p>If this policy changes, the updated version will be posted at this URL. Since we collect no data, meaningful changes are unlikely.</p>
+
+    <h2>Contact</h2>
+    <p>Questions about this policy can be directed to the project's <a href="https://github.com/tjamjam/claude-code-dashboard/issues">GitHub Issues</a>.</p>
+
+    <div class="footer">&copy; 2026 Terrence Fradet</div>
+  </div>
+</body>
+</html>
