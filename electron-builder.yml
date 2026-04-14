@@ -1,4 +1,4 @@
-appId: com.terrencefradet.claude-code-dashboard
+appId: com.github.claude-code-dashboard
 productName: Claude Code Dashboard
 directories:
   output: dist
