@@ -3,9 +3,15 @@ import { useApi } from '../hooks/useApi';
 import PromptCard from './PromptCard';
 import RepoItemsSection, { SectionDivider } from './RepoItemsSection';
 
-const SKILLS_PROMPT = `Look at my ~/.claude/ directory structure, any commands in ~/.claude/commands/, and CLAUDE.md files in my ~/Documents/GitHub repos. Based on patterns in how I use Claude Code across projects, recommend 3–5 skills I should create and write the full ~/.claude/skills/[name]/SKILL.md file for each one — include YAML frontmatter with name and description fields, and make the skill body an actionable step-by-step prompt.`;
+const SKILLS_CREATE_PROMPT = `Look at my ~/.claude/ directory structure, any commands in ~/.claude/commands/, and CLAUDE.md files in my ~/Documents/GitHub repos. Based on patterns in how I use Claude Code across projects, recommend 3–5 skills I should create and write the full ~/.claude/skills/[name]/SKILL.md file for each one — include YAML frontmatter with name and description fields, and make the skill body an actionable step-by-step prompt.`;
 
-function SkillCard({ skill, repoName, onClick }) {
+const SKILLS_AUDIT_PROMPT = `Audit all my skills across ~/.claude/skills/ and my repo .claude/skills/ directories. For each skill: identify if it's outdated, overlaps with another, or could be made more powerful. Suggest concrete improvements and create any missing skills that would fill obvious gaps in my workflow.`;
+
+function skillDetailPrompt(skill) {
+  return `Review this skill called "${skill.name}" with the following content:\n\n${skill.content || '(no content)'}\n\nAnalyze it and suggest:\n1. How to improve the prompt for more consistent, higher-quality output\n2. Whether it should be split into sub-skills or merged with another skill\n3. Any missing steps or edge cases the current version doesn't handle`;
+}
+
+function SkillCard({ skill, onClick }) {
   return (
     <div className="card" onClick={onClick}>
       <h3>{skill.name}</h3>
@@ -13,11 +19,6 @@ function SkillCard({ skill, repoName, onClick }) {
       <div className="card-meta">
         {skill.frontmatter?.model && (
           <span className="badge muted">{skill.frontmatter.model}</span>
-        )}
-        {repoName && (
-          <span className="badge muted" style={{ fontFamily: "'SF Mono','Fira Code',monospace" }}>
-            {repoName}
-          </span>
         )}
       </div>
     </div>
@@ -42,31 +43,38 @@ export default function SkillsView() {
 
   if (selected) {
     return (
-      <div className="detail-view">
-        <div className="detail-header">
-          <button className="btn-back" onClick={() => setSelected(null)}>
-            &larr; Back
-          </button>
-          <h2>{selected.name}</h2>
-        </div>
-        {selected.description && (
-          <div className="detail-meta">
-            <div className="detail-meta-item">
-              <span className="label">Description:</span>
-              <span className="value">{selected.description}</span>
-            </div>
-            {selected.frontmatter?.model && (
-              <div className="detail-meta-item">
-                <span className="label">Model:</span>
-                <span className="value">{selected.frontmatter.model}</span>
-              </div>
-            )}
+      <>
+        <div className="detail-view">
+          <div className="detail-header">
+            <button className="btn-back" onClick={() => setSelected(null)}>
+              &larr; Back
+            </button>
+            <h2>{selected.name}</h2>
           </div>
-        )}
-        <div className="detail-body">
-          <pre>{selected.content}</pre>
+          {selected.description && (
+            <div className="detail-meta">
+              <div className="detail-meta-item">
+                <span className="label">Description:</span>
+                <span className="value">{selected.description}</span>
+              </div>
+              {selected.frontmatter?.model && (
+                <div className="detail-meta-item">
+                  <span className="label">Model:</span>
+                  <span className="value">{selected.frontmatter.model}</span>
+                </div>
+              )}
+            </div>
+          )}
+          <div className="detail-body">
+            <pre>{selected.content}</pre>
+          </div>
         </div>
-      </div>
+        <PromptCard
+          title="Improve this skill"
+          description="Ask Claude Code to review this skill and suggest improvements to its structure and prompt quality."
+          prompt={skillDetailPrompt(selected)}
+        />
+      </>
     );
   }
 
@@ -87,13 +95,7 @@ export default function SkillsView() {
         />
       </div>
 
-      {globalSkills.length === 0 ? (
-        <PromptCard
-          title="Get skill recommendations"
-          description="No global skills installed yet. Ask Claude Code to analyze your workflow and suggest skills to create."
-          prompt={SKILLS_PROMPT}
-        />
-      ) : (
+      {globalSkills.length > 0 && (
         <>
           {hasRepoSkills && <SectionDivider label="Global" />}
           <div className="card-grid">
@@ -118,6 +120,14 @@ export default function SkillsView() {
             onClick={() => setSelected(skill)}
           />
         )}
+      />
+
+      <PromptCard
+        title={globalSkills.length === 0 ? 'Get skill recommendations' : 'Audit your skills'}
+        description={globalSkills.length === 0
+          ? 'No global skills yet. Ask Claude Code to analyze your workflow and suggest skills to create.'
+          : 'Ask Claude Code to review all your skills and identify gaps, overlaps, and improvements.'}
+        prompt={globalSkills.length === 0 ? SKILLS_CREATE_PROMPT : SKILLS_AUDIT_PROMPT}
       />
     </div>
   );

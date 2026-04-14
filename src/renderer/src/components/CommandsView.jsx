@@ -1,6 +1,13 @@
 import { useState } from 'react';
 import { useApi } from '../hooks/useApi';
+import PromptCard from './PromptCard';
 import RepoItemsSection, { SectionDivider } from './RepoItemsSection';
+
+const COMMANDS_AUDIT_PROMPT = `Audit all commands in ~/.claude/commands/ and my repo .claude/commands/ directories. For each command: determine if it should be promoted to a proper skill (with SKILL.md structure), if it overlaps with an existing skill, or if it can be improved. Produce the SKILL.md for any that should be promoted.`;
+
+function commandDetailPrompt(cmd) {
+  return `Review this command "/${cmd.name}":\n\n${cmd.content || '(no content)'}\n\nAnalyze it and suggest:\n1. Whether it should be promoted to a skill — if yes, write the full SKILL.md for ~/.claude/skills/${cmd.name}/SKILL.md\n2. Whether it overlaps with any existing skills or agents and should be consolidated\n3. How to improve the prompt itself for more consistent output`;
+}
 
 function CommandCard({ cmd, onClick }) {
   const preview = cmd.content?.slice(0, 120).trim();
@@ -37,25 +44,32 @@ export default function CommandsView() {
 
   if (selected) {
     return (
-      <div className="detail-view">
-        <div className="detail-header">
-          <button className="btn-back" onClick={() => setSelected(null)}>
-            &larr; Back
-          </button>
-          <h2>/{selected.name}</h2>
-        </div>
-        {selected.files?.length > 0 && (
-          <div className="detail-meta">
-            <div className="detail-meta-item">
-              <span className="label">Files:</span>
-              <span className="value">{selected.files.join(', ')}</span>
-            </div>
+      <>
+        <div className="detail-view">
+          <div className="detail-header">
+            <button className="btn-back" onClick={() => setSelected(null)}>
+              &larr; Back
+            </button>
+            <h2>/{selected.name}</h2>
           </div>
-        )}
-        <div className="detail-body">
-          <pre>{selected.content || 'No content'}</pre>
+          {selected.files?.length > 0 && (
+            <div className="detail-meta">
+              <div className="detail-meta-item">
+                <span className="label">Files:</span>
+                <span className="value">{selected.files.join(', ')}</span>
+              </div>
+            </div>
+          )}
+          <div className="detail-body">
+            <pre>{selected.content || 'No content'}</pre>
+          </div>
         </div>
-      </div>
+        <PromptCard
+          title="Improve or promote this command"
+          description="Ask Claude Code whether this command should become a skill, and how to improve its prompt."
+          prompt={commandDetailPrompt(selected)}
+        />
+      </>
     );
   }
 
@@ -96,35 +110,35 @@ export default function CommandsView() {
         </>
       )}
 
-      {globalCommands.length === 0 && !hasRepoCommands ? (
-        <div className="empty-state">No commands found</div>
-      ) : (
+      {globalCommands.length > 0 && (
         <>
-          {globalCommands.length > 0 && (
-            <>
-              {hasRepoCommands && <SectionDivider label="Global" />}
-              <div className="card-grid">
-                {filteredGlobal.map(cmd => (
-                  <CommandCard key={cmd.id} cmd={cmd} onClick={() => setSelected(cmd)} />
-                ))}
-              </div>
-            </>
-          )}
-
-          <RepoItemsSection
-            repos={repos.data}
-            getItems={r => r.commands || []}
-            search={search}
-            renderCard={(cmd, repo) => (
-              <CommandCard
-                key={`${repo.name}-${cmd.id}`}
-                cmd={cmd}
-                onClick={() => setSelected(cmd)}
-              />
-            )}
-          />
+          {hasRepoCommands && <SectionDivider label="Global" />}
+          <div className="card-grid">
+            {filteredGlobal.map(cmd => (
+              <CommandCard key={cmd.id} cmd={cmd} onClick={() => setSelected(cmd)} />
+            ))}
+          </div>
         </>
       )}
+
+      <RepoItemsSection
+        repos={repos.data}
+        getItems={r => r.commands || []}
+        search={search}
+        renderCard={(cmd, repo) => (
+          <CommandCard
+            key={`${repo.name}-${cmd.id}`}
+            cmd={cmd}
+            onClick={() => setSelected(cmd)}
+          />
+        )}
+      />
+
+      <PromptCard
+        title="Audit your commands"
+        description="Ask Claude Code to review all commands, find promotion candidates, and produce the SKILL.md for any worth upgrading."
+        prompt={COMMANDS_AUDIT_PROMPT}
+      />
     </div>
   );
 }

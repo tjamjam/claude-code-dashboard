@@ -1,4 +1,7 @@
 import { useApi } from '../hooks/useApi';
+import PromptCard from './PromptCard';
+
+const OVERVIEW_PROMPT = `Analyze my full Claude Code setup. Check ~/.claude/ globally — review my skills, agents, commands, plans, memory files, settings.json, and CLAUDE.md. Then give me a prioritized 5-point action plan: what to create, what to improve, what to clean up, and what Claude Code features I'm underusing based on my workflow.`;
 
 const GLOBAL_STATS = [
   { key: 'skills',            label: 'Global Skills',    section: 'skills' },
@@ -64,7 +67,7 @@ export default function Overview({ onNavigate }) {
 
       {!insightsLoading && insights?.length > 0 && (
         <div>
-          <div className="overview-group-label">Insights</div>
+          <div className="overview-group-label">Self-Improvement</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {insights.map(ins => {
               const colors = INSIGHT_COLORS[ins.type] || INSIGHT_COLORS.info;
@@ -95,6 +98,12 @@ export default function Overview({ onNavigate }) {
           </div>
         </div>
       )}
+
+      <PromptCard
+        title="Full Claude Code health check"
+        description="Ask Claude Code to audit your entire setup and give you a prioritized action plan."
+        prompt={OVERVIEW_PROMPT}
+      />
     </div>
   );
 }
