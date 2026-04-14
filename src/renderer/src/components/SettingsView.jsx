@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useApi } from '../hooks/useApi';
 
 // ─── Known built-in tools ────────────────────────────────────────────────────
@@ -55,14 +56,49 @@ const STATUS_STYLES = {
   default: { bg: 'var(--bg)',             border: 'var(--border)',         badge: '#9ca3af', badgeBg: 'var(--border-light)', label: 'Prompts you' },
 };
 
-function ToolRow({ name, desc, allow, deny }) {
+const TOGGLE_OPTIONS = [
+  { value: 'allowed', label: 'Allow',   activeColor: '#059669', activeBg: 'rgba(16,185,129,0.85)' },
+  { value: 'default', label: 'Default', activeColor: '#6b7280', activeBg: 'rgba(107,114,128,0.75)' },
+  { value: 'denied',  label: 'Deny',    activeColor: '#dc2626', activeBg: 'rgba(239,68,68,0.85)'  },
+];
+
+function PermissionToggle({ status, onChange }) {
+  return (
+    <div style={{ display: 'flex', border: '1px solid var(--border)', borderRadius: 100, overflow: 'hidden', flexShrink: 0, alignSelf: 'center' }}>
+      {TOGGLE_OPTIONS.map((opt, i) => {
+        const active = status === opt.value;
+        return (
+          <button
+            key={opt.value}
+            onClick={() => onChange(opt.value)}
+            style={{
+              padding: '4px 11px',
+              fontSize: 11,
+              fontWeight: 600,
+              border: 'none',
+              borderLeft: i > 0 ? '1px solid var(--border)' : 'none',
+              cursor: 'pointer',
+              background: active ? opt.activeBg : 'transparent',
+              color: active ? '#fff' : 'var(--text-tertiary)',
+              transition: 'background 0.12s, color 0.12s',
+            }}
+          >
+            {opt.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function ToolRow({ name, desc, allow, deny, onToggle }) {
   const result = getStatus(name, allow, deny)
   const s = typeof result === 'string' ? { status: result } : result
   const style = STATUS_STYLES[s.status]
 
   return (
     <div style={{
-      display: 'flex', alignItems: 'flex-start', gap: 12,
+      display: 'flex', alignItems: 'center', gap: 12,
       padding: '10px 14px',
       background: style.bg,
       border: `1px solid ${style.border}`,
@@ -81,9 +117,7 @@ function ToolRow({ name, desc, allow, deny }) {
         </div>
         <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>{desc}</div>
       </div>
-      <span style={{ fontSize: 11, fontWeight: 600, color: style.badge, background: style.badgeBg, padding: '3px 9px', borderRadius: 100, flexShrink: 0, marginTop: 2 }}>
-        {style.label}
-      </span>
+      <PermissionToggle status={s.status} onChange={newStatus => onToggle(name, newStatus)} />
     </div>
   );
 }
@@ -212,10 +246,13 @@ function StructuredSettings({ settings }) {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
+const ACTION_MAP = { allowed: 'allow', denied: 'deny', default: 'default' };
+
 export default function SettingsView() {
   const settings = useApi('/settings');
   const plugins = useApi('/plugins');
   const perms = useApi('/permissions');
+  const [localPerms, setLocalPerms] = useState(null);
 
   const loading = settings.loading || plugins.loading || perms.loading;
   if (loading) return <div className="loading">Loading</div>;
@@ -226,15 +263,29 @@ export default function SettingsView() {
     || globalSettings?.dangerouslySkipPermissions || localSettings?.dangerouslySkipPermissions;
 
   // Read allow/deny directly from settings (already fetched) — don't depend on perms endpoint for these
-  const allow = [
+  const fetchedAllow = [
     ...(globalSettings?.permissions?.allow || []),
     ...(localSettings?.permissions?.allow || []),
   ];
-  const deny = [
+  const fetchedDeny = [
     ...(globalSettings?.permissions?.deny || []),
     ...(localSettings?.permissions?.deny || []),
   ];
+  // Use local state after first toggle; fall back to fetched values
+  const allow = localPerms?.allow ?? fetchedAllow;
+  const deny = localPerms?.deny ?? fetchedDeny;
   const mcpServers = perms.data?.mcpServers || {};
+
+  async function handleToggle(toolName, newStatus) {
+    const baseAllow = localPerms?.allow ?? fetchedAllow;
+    const baseDeny = localPerms?.deny ?? fetchedDeny;
+    const nextAllow = baseAllow.filter(p => p.replace(/\(.*\)$/, '') !== toolName);
+    const nextDeny = baseDeny.filter(p => p.replace(/\(.*\)$/, '') !== toolName);
+    if (newStatus === 'allowed') nextAllow.push(`${toolName}(*)`);
+    else if (newStatus === 'denied') nextDeny.push(toolName);
+    setLocalPerms({ allow: nextAllow, deny: nextDeny });
+    await window.api.invoke('/api/settings/permissions/update', { tool: toolName, action: ACTION_MAP[newStatus] });
+  }
 
   return (
     <div>
@@ -269,7 +320,7 @@ export default function SettingsView() {
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {BUILTIN_TOOLS.map(t => (
-              <ToolRow key={t.name} name={t.name} desc={t.desc} allow={allow} deny={deny} />
+              <ToolRow key={t.name} name={t.name} desc={t.desc} allow={allow} deny={deny} onToggle={handleToggle} />
             ))}
           </div>
         </div>

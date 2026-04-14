@@ -518,6 +518,27 @@ ipcMain.handle('/api/permissions', () => {
   return { allow, deny, mcpServers }
 })
 
+// Update a single tool's permission in ~/.claude/settings.json
+ipcMain.handle('/api/settings/permissions/update', (_, { tool, action }) => {
+  const settingsPath = join(CLAUDE_DIR, 'settings.json')
+  const settings = safeJSON(settingsPath) || {}
+  if (!settings.permissions) settings.permissions = {}
+
+  const stripTool = arr => (arr || []).filter(p => p.replace(/\(.*\)$/, '') !== tool)
+  settings.permissions.allow = stripTool(settings.permissions.allow)
+  settings.permissions.deny = stripTool(settings.permissions.deny)
+
+  if (action === 'allow') settings.permissions.allow.push(`${tool}(*)`)
+  else if (action === 'deny') settings.permissions.deny.push(tool)
+
+  if (!settings.permissions.allow.length) delete settings.permissions.allow
+  if (!settings.permissions.deny.length) delete settings.permissions.deny
+  if (!Object.keys(settings.permissions).length) delete settings.permissions
+
+  fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2))
+  return { ok: true }
+})
+
 // Open external URL (for opening report.html in browser)
 ipcMain.handle('open-external', (_, url) => shell.openExternal(url))
 
