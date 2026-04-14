@@ -4,10 +4,12 @@
   --sidebar-bg: #16161e;
   --sidebar-text: #8b8fa3;
   --sidebar-active-text: #f0f0f5;
-  --sidebar-active-bg: rgba(139, 92, 246, 0.12);
+  --sidebar-active-bg: rgba(15, 163, 126, 0.15);
   --sidebar-hover-bg: rgba(255, 255, 255, 0.04);
-  --accent: #8b5cf6;
-  --accent-soft: #ede9fe;
+  --accent: #0fa37e;
+  --accent-light: #2DD2A9;
+  --accent-secondary: #2D56D2;
+  --accent-soft: #e0f7f1;
 
   --bg: #f3f4f6;
   --bg-card: #ffffff;
@@ -207,8 +209,8 @@ body {
   font-size: 11px;
   padding: 2px 8px;
   border-radius: 100px;
-  background: var(--accent-soft);
-  color: var(--accent);
+  background: rgba(45, 86, 210, 0.08);
+  color: var(--accent-secondary);
   font-weight: 500;
 }
 
@@ -487,7 +489,7 @@ body {
 .search-bar input:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+  box-shadow: 0 0 0 3px rgba(45, 210, 169, 0.1);
 }
 
 .search-bar input::placeholder {
