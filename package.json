@@ -2,6 +2,7 @@
   "name": "claude-code-dashboard",
   "version": "1.0.0",
   "description": "A local desktop dashboard for your Claude Code configuration",
+  "author": "Terrence Fradet",
   "main": "out/main/index.js",
   "private": true,
   "scripts": {
