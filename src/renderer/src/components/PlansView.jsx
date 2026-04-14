@@ -64,6 +64,7 @@ export default function PlansView() {
             placeholder="Search plans..."
             value={search}
             onChange={e => setSearch(e.target.value)}
+            aria-label="Search plans"
           />
         </div>
       )}
@@ -73,7 +74,7 @@ export default function PlansView() {
             {filtered.map(plan => {
               const preview = plan.content?.slice(0, 150).replace(/^#+\s.*\n/, '').trim();
               return (
-                <div key={plan.id} className="card" onClick={() => setSelected(plan)}>
+                <div key={plan.id} className="card" onClick={() => setSelected(plan)} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelected(plan); } }} role="button" tabIndex={0}>
                   <h3>{plan.title}</h3>
                   <p>{preview || 'Empty plan'}</p>
                 </div>

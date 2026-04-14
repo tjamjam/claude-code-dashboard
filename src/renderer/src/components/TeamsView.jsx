@@ -68,7 +68,7 @@ export default function TeamsView() {
             ? Object.keys(team.config.members).length
             : 0;
           return (
-            <div key={team.id} className="card" onClick={() => setSelected(team)}>
+            <div key={team.id} className="card" onClick={() => setSelected(team)} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelected(team); } }} role="button" tabIndex={0}>
               <h3>{team.name}</h3>
               <p>
                 {team.hasConfig

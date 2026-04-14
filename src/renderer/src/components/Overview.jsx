@@ -52,28 +52,19 @@ function ModelBanner({ model }) {
           position: 'absolute', top: -8, right: -8,
           fontSize: 80, opacity: 0.08, transform: 'rotate(12deg)',
           pointerEvents: 'none', userSelect: 'none',
-        }}>&#x1F480;</div>
-        <div style={{ fontSize: 28, marginBottom: 8 }}>&#x1F6A8;&#x1F525;&#x1F6A8;</div>
+        }}>&#x1F6A8;</div>
+        <div style={{ fontSize: 28, marginBottom: 8 }}>&#x1F6A8;</div>
         <div className="error-text" style={{
           fontWeight: 800, fontSize: 16, marginBottom: 4,
           textTransform: 'uppercase', letterSpacing: '0.05em',
         }}>
-          CODE RED: HAIKU DETECTED
+          HAIKU DETECTED
         </div>
         <div style={{ fontSize: 13.5, color: 'var(--text-secondary)', maxWidth: 600 }}>
           Your global model is set to <strong className="error-text">{display}</strong>.
-          Haiku is a grocery list model. It is the Honda Civic of LLMs. You are trying to build
-          a house with a spoon. Opus is RIGHT THERE. You are literally paying for it. This is
-          like owning a Ferrari and taking the bus. Please run <code>/model</code> before
-          Haiku hallucinates your entire codebase into a pile of TODO comments.
-        </div>
-        <div className="error-text" style={{
-          marginTop: 12, padding: '8px 12px',
-          background: 'rgba(239,68,68,0.08)', borderRadius: 'var(--radius-sm)',
-          fontFamily: "'SF Mono','Fira Code',monospace", fontSize: 12,
-          display: 'inline-block',
-        }}>
-          THREAT LEVEL: <strong>CATASTROPHIC</strong>
+          Haiku is fast and cheap, but it's not built for complex coding tasks. Opus is
+          significantly more capable for code generation, debugging, and architecture.
+          Switch with <code>/model</code> to get the most out of Claude Code.
         </div>
       </div>
     );
@@ -183,6 +174,9 @@ export default function Overview({ onNavigate }) {
             key={key}
             className="stat-card"
             onClick={() => section && onNavigate?.(section)}
+            onKeyDown={section ? e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onNavigate?.(section); } } : undefined}
+            role={section ? 'button' : undefined}
+            tabIndex={section ? 0 : undefined}
             style={{ cursor: section ? 'pointer' : 'default' }}
           >
             <div className="stat-number">{data?.[key] ?? 0}</div>

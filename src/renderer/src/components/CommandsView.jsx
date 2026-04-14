@@ -12,7 +12,7 @@ function commandDetailPrompt(cmd) {
 function CommandCard({ cmd, onClick }) {
   const preview = cmd.content?.slice(0, 120).trim();
   return (
-    <div className="card" onClick={onClick}>
+    <div className="card" onClick={onClick} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } }} role="button" tabIndex={0}>
       <h3>/{cmd.name}</h3>
       <p>{preview || 'No content'}</p>
       {cmd.files?.length > 0 && (
@@ -91,6 +91,7 @@ export default function CommandsView() {
               placeholder="Search commands..."
               value={search}
               onChange={e => setSearch(e.target.value)}
+              aria-label="Search commands"
             />
           </div>
           <div className="accent-box" style={{

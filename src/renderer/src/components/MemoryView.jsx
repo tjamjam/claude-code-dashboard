@@ -37,6 +37,7 @@ export default function MemoryView() {
           placeholder="Search projects and memories..."
           value={search}
           onChange={e => setSearch(e.target.value)}
+          aria-label="Search projects and memories"
         />
       </div>
       {filtered.map(project => (
@@ -44,6 +45,10 @@ export default function MemoryView() {
           <div
             className="project-header"
             onClick={() => setExpanded(expanded === project.id ? null : project.id)}
+            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpanded(expanded === project.id ? null : project.id); } }}
+            role="button"
+            tabIndex={0}
+            aria-expanded={expanded === project.id}
           >
             <h3>{project.displayPath}</h3>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>

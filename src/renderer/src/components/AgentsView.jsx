@@ -13,7 +13,7 @@ function agentDetailPrompt(agent) {
 
 function AgentCard({ agent, onClick }) {
   return (
-    <div className="card" onClick={onClick}>
+    <div className="card" onClick={onClick} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } }} role="button" tabIndex={0}>
       <h3>{agent.name}</h3>
       <p>{agent.frontmatter?.description || 'No description'}</p>
       <div className="card-meta">
@@ -105,6 +105,7 @@ export default function AgentsView() {
           placeholder="Search agents..."
           value={search}
           onChange={e => setSearch(e.target.value)}
+          aria-label="Search agents"
         />
       </div>
 

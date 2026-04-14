@@ -4,8 +4,14 @@ import fs from 'fs'
 
 const BOOKMARKS_PATH = join(app.getPath('userData'), 'folder-bookmarks.json')
 
-// Whether we're running as a Mac App Store build
-export const isMAS = process.mas === true || process.env.MAS === '1'
+// Whether we're running as a Mac App Store build.
+// process.mas is set by Electron for MAS builds. We also check the sandbox
+// environment variable as a fallback — if the app is running inside the
+// macOS App Sandbox, treat it as MAS regardless.
+export const isMAS =
+  process.mas === true ||
+  process.env.MAS === '1' ||
+  process.env.APP_SANDBOX_CONTAINER_ID != null
 
 function readBookmarks() {
   try { return JSON.parse(fs.readFileSync(BOOKMARKS_PATH, 'utf-8')) } catch { return {} }

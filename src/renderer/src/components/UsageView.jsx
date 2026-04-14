@@ -20,6 +20,7 @@ export default function UsageView() {
       {data?.reportHtml ? (
         <iframe
           srcDoc={data.reportHtml}
+          title="Claude Code usage insights report"
           style={{
             width: '100%',
             height: 'calc(100vh - 160px)',

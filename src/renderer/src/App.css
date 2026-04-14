@@ -181,6 +181,11 @@ body {
   border-color: var(--accent);
 }
 
+.card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .card h3 {
   font-size: 14px;
   font-weight: 600;
@@ -261,6 +266,14 @@ body {
   color: var(--text);
 }
 
+.btn-back:focus-visible,
+.btn-accent:focus-visible,
+.btn-copy:focus-visible,
+.btn-danger:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .detail-meta {
   padding: 16px 24px;
   background: var(--bg);
@@ -336,6 +349,11 @@ body {
   border-color: var(--accent);
 }
 
+.stat-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .stat-card .stat-number {
   font-size: 28px;
   font-weight: 700;
@@ -398,6 +416,11 @@ body {
 
 .project-header:hover {
   background: var(--bg);
+}
+
+.project-header:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
 }
 
 .project-header h3 {

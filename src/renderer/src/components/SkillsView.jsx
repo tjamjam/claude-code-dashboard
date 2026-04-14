@@ -13,7 +13,7 @@ function skillDetailPrompt(skill) {
 
 function SkillCard({ skill, onClick }) {
   return (
-    <div className="card" onClick={onClick}>
+    <div className="card" onClick={onClick} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } }} role="button" tabIndex={0}>
       <h3>{skill.name}</h3>
       <p>{skill.description || 'No description'}</p>
       <div className="card-meta">
@@ -93,6 +93,7 @@ export default function SkillsView() {
           placeholder="Search skills..."
           value={search}
           onChange={e => setSearch(e.target.value)}
+          aria-label="Search skills"
         />
       </div>
 

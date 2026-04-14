@@ -357,6 +357,7 @@ export default function ReposView() {
             placeholder="Search repos..."
             value={search}
             onChange={e => setSearch(e.target.value)}
+            aria-label="Search repos"
           />
         </div>
         <div style={{ display: 'flex', gap: '4px' }}>
@@ -389,7 +390,7 @@ export default function ReposView() {
         {filtered.map(repo => {
           const repoServers = serversByRepo[repo.path] || [];
           return (
-            <div key={repo.name} className="card" onClick={() => setSelected(repo)}>
+            <div key={repo.name} className="card" onClick={() => setSelected(repo)} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelected(repo); } }} role="button" tabIndex={0}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <h3 style={{ flex: 1 }}>{repo.name}</h3>
                 {repoServers.length > 0 && (

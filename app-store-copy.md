@@ -19,8 +19,8 @@ Claude Code Dashboard gives you a visual command center for your entire Claude C
 **See everything at a glance**
 The overview dashboard shows your global and repo-level stats — how many skills, agents, commands, plans, and memory files you have, how many repos are configured, and which ones need attention. Self-improvement insights surface actionable recommendations: missing CLAUDE.md files, overly broad permissions, commands that should be promoted to skills.
 
-**Manage permissions without editing JSON**
-Toggle tool permissions with a single click. Every built-in Claude Code tool — Bash, Read, Write, Edit, Glob, Grep, and more — shows its current status (Allowed, Denied, or Prompts you) with a three-state toggle that writes directly to your settings file. See your MCP servers, their connection type, and their permission scope.
+**See your full permission matrix**
+View the status of every built-in Claude Code tool — Bash, Read, Write, Edit, Glob, Grep, and more — at a glance. Each tool shows whether it's Allowed, Denied, or set to Prompt. See your MCP servers, their connection type, and their permission scope. Copy a prompt to adjust permissions in your next Claude Code session.
 
 **Browse repos at scale**
 Scan every repo in ~/Documents/GitHub automatically. Search, filter by configuration status, and click into any repo to see its CLAUDE.md, skills, commands, agents, rules, hooks, and settings. Unconfigured repos get a one-click prompt to set them up. Configured repos get an audit prompt to improve what's there.
@@ -28,15 +28,15 @@ Scan every repo in ~/Documents/GitHub automatically. Search, filter by configura
 **Skills, agents, and commands — global and per-repo**
 Browse all your skills, agents, and commands in one place, organized by global vs. repo-level. Click into any item to see its full content. Every view includes contextual prompts you can copy and paste into a Claude Code session to create, audit, or improve your setup.
 
-**Dev server monitoring**
-Automatically detects running local dev servers across your repos. See which ports are active, open them in your browser, or stop them — all from the dashboard.
+**Dev server monitoring (direct download only)**
+The direct-download version detects running local dev servers across your repos, shows active ports, opens them in your browser, and lets you stop them from the dashboard. This feature is not available in the App Store build due to sandbox restrictions.
 
 **Copy-paste prompts everywhere**
 Every page includes a pre-written prompt tailored to your current context. Click "Copy prompt," paste into Claude Code, and get immediate results — skill recommendations, command audits, CLAUDE.md generation, plan triage, and full setup health checks.
 
 **Built for Claude Code power users**
 - Overview dashboard with stats and self-improvement insights
-- Full permission matrix for all 15 built-in tools
+- Full permission matrix for all 15 built-in tools (view)
 - MCP server monitoring with connection details
 - Repo scanner with search, filters, and per-repo detail views
 - Skills, agents, commands, plans, memory, and teams browsers
