@@ -11,6 +11,7 @@ import CommandsView from './components/CommandsView';
 import ReposView from './components/ReposView';
 import ClaudeMdView from './components/ClaudeMdView';
 import UsageView from './components/UsageView';
+import McpView from './components/McpView';
 
 const SECTIONS = {
   overview:  { label: 'Overview',   icon: '\u2302', component: Overview },
@@ -21,8 +22,9 @@ const SECTIONS = {
   memory:    { label: 'Memory',     icon: '\u2630', component: MemoryView },
   plans:     { label: 'Plans',      icon: '\u2637', component: PlansView },
   commands:  { label: 'Commands',   icon: '\u276F', component: CommandsView },
+  mcp:       { label: 'MCP',        icon: '\u2B62', component: McpView },
   'claude-md': { label: 'CLAUDE.md', icon: '\u2767', component: ClaudeMdView },
-  usage:     { label: 'Insights',   icon: '\u25F0', component: UsageView },
+  usage:     { label: 'Self-Improvement', icon: '\u25F0', component: UsageView },
   settings:  { label: 'Settings',   icon: '\u2638', component: SettingsView },
 };
 
