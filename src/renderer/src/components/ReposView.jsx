@@ -40,7 +40,45 @@ function CopyButton({ text, label }) {
   );
 }
 
-function RepoDetail({ repo, onBack }) {
+function ServerBadge({ server, onKill, onOpen }) {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 8,
+      padding: '6px 10px',
+      background: 'rgba(16,185,129,0.06)',
+      border: '1px solid rgba(16,185,129,0.18)',
+      borderRadius: 'var(--radius-sm)',
+    }}>
+      <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#22c55e', flexShrink: 0 }} />
+      <a
+        href="#"
+        onClick={e => { e.preventDefault(); e.stopPropagation(); onOpen(server.port); }}
+        style={{
+          fontFamily: "'SF Mono','Fira Code',monospace", fontSize: 12, fontWeight: 600,
+          color: '#059669', textDecoration: 'none',
+        }}
+      >
+        :{server.port}
+      </a>
+      <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{server.command}</span>
+      <button
+        onClick={e => { e.stopPropagation(); onKill(server.pid); }}
+        style={{
+          marginLeft: 'auto', padding: '2px 8px', fontSize: 11, fontWeight: 600,
+          background: 'rgba(239,68,68,0.08)', color: '#dc2626',
+          border: '1px solid rgba(239,68,68,0.18)', borderRadius: 100, cursor: 'pointer',
+          transition: 'background 0.12s',
+        }}
+        onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.18)'}
+        onMouseLeave={e => e.currentTarget.style.background = 'rgba(239,68,68,0.08)'}
+      >
+        Stop
+      </button>
+    </div>
+  );
+}
+
+function RepoDetail({ repo, servers, onKill, onOpen, onBack }) {
   const [tab, setTab] = useState('overview');
 
   const tabs = [
@@ -99,7 +137,7 @@ function RepoDetail({ repo, onBack }) {
               <p style={{ color: 'var(--text-secondary)', fontSize: '13px', margin: 0, flex: 1, fontFamily: "'SF Mono','Fira Code',monospace" }}>
                 {repo.path}
               </p>
-              <CopyButton text={`cd ${repo.path} && claude`} label="cd && claude" />
+              <CopyButton text={`cd ${repo.path} && claude --dangerously-skip-permissions`} label="cd && claude --yolo" />
               <CopyButton text={repo.path} label="Copy path" />
             </div>
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '20px' }}>
@@ -114,6 +152,16 @@ function RepoDetail({ repo, onBack }) {
               <div style={{ marginTop: '16px' }}>
                 <h4 style={{ fontSize: '13px', marginBottom: '8px' }}>Hooks</h4>
                 <pre>{JSON.stringify(repo.hooks, null, 2)}</pre>
+              </div>
+            )}
+            {servers.length > 0 && (
+              <div style={{ marginTop: '16px' }}>
+                <h4 style={{ fontSize: '13px', marginBottom: '8px' }}>Running Servers</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {servers.map(s => (
+                    <ServerBadge key={`${s.pid}-${s.port}`} server={s} onKill={onKill} onOpen={onOpen} />
+                  ))}
+                </div>
               </div>
             )}
             <PromptCard
@@ -242,6 +290,7 @@ function RepoDetail({ repo, onBack }) {
 
 export default function ReposView() {
   const { data, loading } = useApi('/repos');
+  const servers = useApi('/dev-servers');
   const [selected, setSelected] = useState(null);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all'); // 'all' | 'configured' | 'vanilla'
@@ -256,6 +305,26 @@ export default function ReposView() {
     </div>
   );
 
+  // Group servers by repo path, deduplicate by port
+  const serversByRepo = {};
+  if (servers.data) {
+    for (const s of servers.data) {
+      if (!serversByRepo[s.repoPath]) serversByRepo[s.repoPath] = [];
+      if (!serversByRepo[s.repoPath].some(e => e.port === s.port)) {
+        serversByRepo[s.repoPath].push(s);
+      }
+    }
+  }
+
+  async function killServer(pid) {
+    await window.api.invoke('/api/dev-servers/kill', { pid });
+    setTimeout(() => servers.refetch(true), 500);
+  }
+
+  function openPort(port) {
+    window.api.openExternal(`http://localhost:${port}`);
+  }
+
   const filtered = data.filter(r => {
     const matchesSearch = r.name.toLowerCase().includes(search.toLowerCase());
     const matchesFilter =
@@ -268,7 +337,15 @@ export default function ReposView() {
   const configuredCount = data.filter(r => r.hasConfig).length;
 
   if (selected) {
-    return <RepoDetail repo={selected} onBack={() => setSelected(null)} />;
+    return (
+      <RepoDetail
+        repo={selected}
+        servers={serversByRepo[selected.path] || []}
+        onKill={killServer}
+        onOpen={openPort}
+        onBack={() => setSelected(null)}
+      />
+    );
   }
 
   return (
@@ -313,19 +390,46 @@ export default function ReposView() {
         </div>
       </div>
       <div className="card-grid">
-        {filtered.map(repo => (
-          <div key={repo.name} className="card" onClick={() => setSelected(repo)}>
-            <h3>{repo.name}</h3>
-            <div className="card-meta" style={{ marginTop: '8px' }}>
-              {repo.configItems.length > 0
-                ? repo.configItems.map(item => (
-                    <span key={item} className="badge">{item}</span>
-                  ))
-                : <span className="badge muted">No config</span>
-              }
+        {filtered.map(repo => {
+          const repoServers = serversByRepo[repo.path] || [];
+          return (
+            <div key={repo.name} className="card" onClick={() => setSelected(repo)}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <h3 style={{ flex: 1 }}>{repo.name}</h3>
+                {repoServers.length > 0 && (
+                  <div style={{ display: 'flex', gap: 4 }}>
+                    {repoServers.map(s => (
+                      <a
+                        key={s.port}
+                        href="#"
+                        onClick={e => { e.preventDefault(); e.stopPropagation(); openPort(s.port); }}
+                        title={`${s.command} on port ${s.port} (PID ${s.pid})`}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 4,
+                          padding: '2px 8px', borderRadius: 100, fontSize: 11, fontWeight: 600,
+                          fontFamily: "'SF Mono','Fira Code',monospace",
+                          background: 'rgba(16,185,129,0.1)', color: '#059669',
+                          textDecoration: 'none', border: '1px solid rgba(16,185,129,0.2)',
+                        }}
+                      >
+                        <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#22c55e' }} />
+                        :{s.port}
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="card-meta" style={{ marginTop: '8px' }}>
+                {repo.configItems.length > 0
+                  ? repo.configItems.map(item => (
+                      <span key={item} className="badge">{item}</span>
+                    ))
+                  : <span className="badge muted">No config</span>
+                }
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
       {filtered.length === 0 && <div className="empty-state">No repos match your search</div>}
     </div>
