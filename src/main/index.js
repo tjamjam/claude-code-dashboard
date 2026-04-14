@@ -1,10 +1,20 @@
 import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { join } from 'path'
+import { execSync } from 'child_process'
 import os from 'os'
 import fs from 'fs'
 import matter from 'gray-matter'
+import { isMAS, hasRequiredFolders, runSetup, getBasePaths } from './sandbox.js'
 
-const CLAUDE_DIR = join(os.homedir(), '.claude')
+// Resolved after setup (or immediately for non-MAS)
+let CLAUDE_DIR
+let REPOS_DIR
+
+function initPaths() {
+  const paths = getBasePaths()
+  CLAUDE_DIR = process.env.CLAUDE_DIR_OVERRIDE || paths.claudeDir || join(os.homedir(), '.claude')
+  REPOS_DIR = process.env.REPOS_DIR_OVERRIDE || paths.reposDir || join(os.homedir(), 'Documents', 'GitHub')
+}
 
 function safeRead(filePath) {
   try { return fs.readFileSync(filePath, 'utf-8') } catch { return null }
@@ -38,7 +48,7 @@ function files(dirPath, ext) {
 }
 
 function scanGithubRepos() {
-  const githubDir = join(os.homedir(), 'Documents', 'GitHub')
+  const githubDir = REPOS_DIR
   const repos = []
   try {
     const entries = fs.readdirSync(githubDir, { withFileTypes: true })
@@ -110,7 +120,7 @@ ipcMain.handle('/api/overview', () => {
   }
 })
 
-// Insights
+// Self-Improvement
 ipcMain.handle('/api/insights', () => {
   const insights = []
   const settings = safeJSON(join(CLAUDE_DIR, 'settings.json'))
@@ -144,7 +154,7 @@ ipcMain.handle('/api/insights', () => {
       title: 'Broad permissions active',
       message: hasBroadBash
         ? 'Bash(*) allows all shell commands without prompting. Consider scoping to specific patterns.'
-        : 'skipDangerousModePermissionPrompt is enabled — Claude will not ask before running tools.'
+        : 'skipDangerousModePermissionPrompt is enabled — the safety confirmation is suppressed when launching with --dangerously-skip-permissions.'
     })
   }
 
@@ -342,7 +352,7 @@ ipcMain.handle('/api/plugins', () => {
 
 // Repos
 ipcMain.handle('/api/repos', () => {
-  const githubDir = join(os.homedir(), 'Documents', 'GitHub')
+  const githubDir = REPOS_DIR
 
   function isGitRepo(dirPath) {
     try { return fs.statSync(join(dirPath, '.git')).isDirectory() } catch { return false }
@@ -518,8 +528,9 @@ ipcMain.handle('/api/permissions', () => {
   return { allow, deny, mcpServers }
 })
 
-// Update a single tool's permission in ~/.claude/settings.json
+// Update a single tool's permission in ~/.claude/settings.json (disabled in MAS sandbox)
 ipcMain.handle('/api/settings/permissions/update', (_, { tool, action }) => {
+  if (isMAS) return { ok: false, error: 'Not available in App Store build' }
   const settingsPath = join(CLAUDE_DIR, 'settings.json')
   const settings = safeJSON(settingsPath) || {}
   if (!settings.permissions) settings.permissions = {}
@@ -539,8 +550,99 @@ ipcMain.handle('/api/settings/permissions/update', (_, { tool, action }) => {
   return { ok: true }
 })
 
+// Setup / sandbox
+ipcMain.handle('/api/setup/status', () => ({
+  needsSetup: isMAS && !hasRequiredFolders(),
+  isMAS,
+  paths: getBasePaths(),
+}))
+
+ipcMain.handle('/api/setup/run', async () => {
+  const win = BrowserWindow.getAllWindows()[0]
+  if (!win) return { ok: false, error: 'No window' }
+  const result = await runSetup(win)
+  if (result.ok) initPaths()
+  return result
+})
+
+// Dev servers — find listening TCP ports matched to repo directories
+// Disabled in MAS sandbox (lsof and process.kill are blocked)
+ipcMain.handle('/api/dev-servers', () => {
+  if (isMAS) return []
+  try {
+    const raw = execSync('lsof -iTCP -sTCP:LISTEN -n -P -F pcn', { encoding: 'utf-8', timeout: 5000 })
+
+    // Parse lsof -F output: p=pid, c=command, n=name (host:port)
+    const procs = []
+    let cur = null
+    for (const line of raw.split('\n')) {
+      if (!line) continue
+      if (line[0] === 'p') { cur = { pid: parseInt(line.slice(1)), ports: new Set() }; procs.push(cur) }
+      else if (line[0] === 'c' && cur) cur.command = line.slice(1)
+      else if (line[0] === 'n' && cur) {
+        const m = line.match(/:(\d+)$/)
+        if (m) cur.ports.add(parseInt(m[1]))
+      }
+    }
+
+    // Batch-resolve working directories
+    const pids = procs.map(p => p.pid)
+    const pidCwd = {}
+    if (pids.length) {
+      try {
+        const cwdRaw = execSync(`lsof -a -d cwd -p ${pids.join(',')} -F pn`, { encoding: 'utf-8', timeout: 5000 })
+        let pid = null
+        for (const line of cwdRaw.split('\n')) {
+          if (!line) continue
+          if (line[0] === 'p') pid = parseInt(line.slice(1))
+          else if (line[0] === 'n' && pid) { pidCwd[pid] = line.slice(1); pid = null }
+        }
+      } catch {}
+    }
+
+    // Match to repos
+    const repos = scanGithubRepos()
+    const results = []
+    for (const proc of procs) {
+      const cwd = pidCwd[proc.pid]
+      if (!cwd) continue
+      const repo = repos.find(rp => cwd === rp || cwd.startsWith(rp + '/'))
+      if (!repo) continue
+      for (const port of proc.ports) {
+        results.push({
+          pid: proc.pid,
+          port,
+          command: proc.command || 'unknown',
+          cwd,
+          repoPath: repo,
+          repoName: repo.split('/').pop(),
+        })
+      }
+    }
+    return results
+  } catch {
+    return []
+  }
+})
+
+// Kill a dev server process (disabled in MAS sandbox)
+ipcMain.handle('/api/dev-servers/kill', (_, { pid }) => {
+  if (isMAS) return { ok: false, error: 'Not available in App Store build' }
+  const parsed = parseInt(pid, 10)
+  if (!Number.isFinite(parsed) || parsed <= 0) return { ok: false, error: 'Invalid PID' }
+  try {
+    process.kill(parsed, 'SIGTERM')
+    return { ok: true }
+  } catch (e) {
+    return { ok: false, error: e.message }
+  }
+})
+
 // Open external URL (for opening report.html in browser)
-ipcMain.handle('open-external', (_, url) => shell.openExternal(url))
+ipcMain.handle('open-external', (_, url) => {
+  if (typeof url !== 'string' || !/^https?:\/\//i.test(url)) return
+  shell.openExternal(url)
+})
 
 // Usage data
 ipcMain.handle('/api/usage', () => {
@@ -620,9 +722,13 @@ ipcMain.handle('/api/usage', () => {
 })
 
 function createWindow() {
+  initPaths()
+
   const win = new BrowserWindow({
     width: 1280,
     height: 800,
+    minWidth: 800,
+    minHeight: 500,
     titleBarStyle: 'hiddenInset',
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),

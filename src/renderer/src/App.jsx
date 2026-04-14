@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
+import SetupView from './components/SetupView';
 import Overview from './components/Overview';
 import SkillsView from './components/SkillsView';
 import AgentsView from './components/AgentsView';
@@ -30,7 +31,15 @@ const SECTIONS = {
 
 export default function App() {
   const [section, setSection] = useState('overview');
+  const [needsSetup, setNeedsSetup] = useState(null);
   const Current = SECTIONS[section].component;
+
+  useEffect(() => {
+    window.api.invoke('/api/setup/status').then(s => setNeedsSetup(s.needsSetup));
+  }, []);
+
+  if (needsSetup === null) return null; // loading
+  if (needsSetup) return <SetupView onComplete={() => setNeedsSetup(false)} />;
 
   return (
     <div className="app">

@@ -33,6 +33,7 @@ export default function SkillsView() {
 
   const loading = skills.loading || repos.loading;
   if (loading) return <div className="loading">Loading</div>;
+  if (skills.error || repos.error) return <div className="loading">Failed to load skills</div>;
 
   const globalSkills = skills.data || [];
   const q = search.toLowerCase();

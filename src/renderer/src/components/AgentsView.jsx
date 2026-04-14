@@ -33,6 +33,7 @@ export default function AgentsView() {
 
   const loading = agents.loading || repos.loading;
   if (loading) return <div className="loading">Loading</div>;
+  if (agents.error || repos.error) return <div className="loading">Failed to load agents</div>;
 
   const globalAgents = agents.data || [];
   const q = search.toLowerCase();

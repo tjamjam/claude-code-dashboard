@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { useApi } from '../hooks/useApi';
+import PromptCard from './PromptCard';
 
 // ─── Known built-in tools ────────────────────────────────────────────────────
 
@@ -24,7 +24,6 @@ const BUILTIN_TOOLS = [
 // ─── Permission matching ─────────────────────────────────────────────────────
 
 function matchesPattern(toolName, pattern) {
-  // mcp tool: check prefix wildcard e.g. mcp__server__*
   if (toolName.startsWith('mcp__') || pattern.includes('__')) {
     if (pattern.endsWith('*')) {
       const prefix = pattern.slice(0, -1)
@@ -32,7 +31,6 @@ function matchesPattern(toolName, pattern) {
     }
     return toolName === pattern
   }
-  // Extract base tool name from pattern like "Bash(*)" or "Bash(git *)"
   const base = pattern.replace(/\(.*\)$/, '')
   return base === toolName || pattern === toolName
 }
@@ -40,7 +38,6 @@ function matchesPattern(toolName, pattern) {
 function getStatus(toolName, allow, deny) {
   if (deny?.some(p => matchesPattern(toolName, p))) return 'denied'
   if (allow?.some(p => matchesPattern(toolName, p))) {
-    // Find the matching pattern to show scope
     const match = allow.find(p => matchesPattern(toolName, p))
     const scope = match?.match(/\((.+)\)/)?.[1] || null
     return { status: 'allowed', scope }
@@ -50,58 +47,16 @@ function getStatus(toolName, allow, deny) {
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
-const STATUS_STYLES = {
-  allowed: { bg: 'rgba(16,185,129,0.08)', border: 'rgba(16,185,129,0.2)', badge: '#059669', badgeBg: 'rgba(16,185,129,0.12)', label: 'Allowed' },
-  denied:  { bg: 'rgba(239,68,68,0.06)',  border: 'rgba(239,68,68,0.2)',  badge: '#dc2626', badgeBg: 'rgba(239,68,68,0.1)',  label: 'Denied' },
-  default: { bg: 'var(--bg)',             border: 'var(--border)',         badge: '#9ca3af', badgeBg: 'var(--border-light)', label: 'Prompts you' },
-};
+const STATUS_LABELS = { allowed: 'Allowed', denied: 'Denied', default: 'Prompts you' };
+const STATUS_CLASSES = { allowed: 'status-allowed', denied: 'status-denied', default: 'status-default' };
 
-const TOGGLE_OPTIONS = [
-  { value: 'allowed', label: 'Allow',   activeColor: '#059669', activeBg: 'rgba(16,185,129,0.85)' },
-  { value: 'default', label: 'Default', activeColor: '#6b7280', activeBg: 'rgba(107,114,128,0.75)' },
-  { value: 'denied',  label: 'Deny',    activeColor: '#dc2626', activeBg: 'rgba(239,68,68,0.85)'  },
-];
-
-function PermissionToggle({ status, onChange }) {
-  return (
-    <div style={{ display: 'flex', border: '1px solid var(--border)', borderRadius: 100, overflow: 'hidden', flexShrink: 0, alignSelf: 'center' }}>
-      {TOGGLE_OPTIONS.map((opt, i) => {
-        const active = status === opt.value;
-        return (
-          <button
-            key={opt.value}
-            onClick={() => onChange(opt.value)}
-            style={{
-              padding: '4px 11px',
-              fontSize: 11,
-              fontWeight: 600,
-              border: 'none',
-              borderLeft: i > 0 ? '1px solid var(--border)' : 'none',
-              cursor: 'pointer',
-              background: active ? opt.activeBg : 'transparent',
-              color: active ? '#fff' : 'var(--text-tertiary)',
-              transition: 'background 0.12s, color 0.12s',
-            }}
-          >
-            {opt.label}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-function ToolRow({ name, desc, allow, deny, onToggle }) {
+function ToolRow({ name, desc, allow, deny }) {
   const result = getStatus(name, allow, deny)
   const s = typeof result === 'string' ? { status: result } : result
-  const style = STATUS_STYLES[s.status]
-
   return (
-    <div style={{
+    <div className={STATUS_CLASSES[s.status]} style={{
       display: 'flex', alignItems: 'center', gap: 12,
       padding: '10px 14px',
-      background: style.bg,
-      border: `1px solid ${style.border}`,
       borderRadius: 'var(--radius-sm)',
     }}>
       <div style={{ flex: 1 }}>
@@ -117,7 +72,9 @@ function ToolRow({ name, desc, allow, deny, onToggle }) {
         </div>
         <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>{desc}</div>
       </div>
-      <PermissionToggle status={s.status} onChange={newStatus => onToggle(name, newStatus)} />
+      <span className="status-badge" style={{ fontSize: 11, fontWeight: 600, padding: '3px 9px', borderRadius: 100, flexShrink: 0 }}>
+        {STATUS_LABELS[s.status]}
+      </span>
     </div>
   );
 }
@@ -128,14 +85,11 @@ function McpServerRow({ serverKey, info, allow, deny }) {
   const isAllowed = allow?.some(p => p === wildcardPattern || (p.endsWith('*') && wildcardPattern.startsWith(p.slice(0, -1))))
   const isDenied = deny?.some(p => p === wildcardPattern || (p.endsWith('*') && wildcardPattern.startsWith(p.slice(0, -1))))
   const s = isDenied ? 'denied' : isAllowed ? 'allowed' : 'default'
-  const style = STATUS_STYLES[s]
 
   return (
-    <div style={{
+    <div className={STATUS_CLASSES[s]} style={{
       display: 'flex', alignItems: 'flex-start', gap: 12,
       padding: '10px 14px',
-      background: style.bg,
-      border: `1px solid ${style.border}`,
       borderRadius: 'var(--radius-sm)',
     }}>
       <div style={{ flex: 1 }}>
@@ -151,22 +105,18 @@ function McpServerRow({ serverKey, info, allow, deny }) {
           mcp__{serverKey}__*
         </div>
       </div>
-      <span style={{ fontSize: 11, fontWeight: 600, color: style.badge, background: style.badgeBg, padding: '3px 9px', borderRadius: 100, flexShrink: 0, marginTop: 2 }}>
-        {style.label}
+      <span className="status-badge" style={{ fontSize: 11, fontWeight: 600, padding: '3px 9px', borderRadius: 100, flexShrink: 0, marginTop: 2 }}>
+        {STATUS_LABELS[s]}
       </span>
     </div>
   );
 }
 
+const TAG_CLASSES = { accent: 'tag-accent', green: 'tag-green', red: 'tag-red', gray: 'tag-gray' };
+
 function Tag({ children, color = 'accent' }) {
-  const styles = {
-    accent: { background: 'rgba(139,92,246,0.1)', color: '#7c3aed' },
-    green:  { background: 'rgba(16,185,129,0.1)', color: '#059669' },
-    red:    { background: 'rgba(239,68,68,0.1)',  color: '#dc2626' },
-    gray:   { background: 'var(--border-light)',   color: 'var(--text-tertiary)' },
-  };
   return (
-    <span style={{ ...styles[color], fontSize: 11.5, fontWeight: 500, padding: '3px 9px', borderRadius: 100, fontFamily: "'SF Mono','Fira Code',monospace" }}>
+    <span className={TAG_CLASSES[color] || 'tag-accent'} style={{ fontSize: 11.5, fontWeight: 500, padding: '3px 9px', borderRadius: 100, fontFamily: "'SF Mono','Fira Code',monospace" }}>
       {children}
     </span>
   );
@@ -244,48 +194,34 @@ function StructuredSettings({ settings }) {
   );
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
+// ─── Prompt for changing permissions ─────────────────────────────────────────
 
-const ACTION_MAP = { allowed: 'allow', denied: 'deny', default: 'default' };
+const PERMISSIONS_PROMPT = `Review my current Claude Code permissions in ~/.claude/settings.json. Show me what's currently allowed and denied, then ask which tools I'd like to change. Update the permissions.allow and permissions.deny arrays in settings.json based on my answers.`;
+
+// ─── Main component ───────────────────────────────────────────────────────────
 
 export default function SettingsView() {
   const settings = useApi('/settings');
   const plugins = useApi('/plugins');
   const perms = useApi('/permissions');
-  const [localPerms, setLocalPerms] = useState(null);
 
   const loading = settings.loading || plugins.loading || perms.loading;
   if (loading) return <div className="loading">Loading</div>;
+  if (settings.error || plugins.error || perms.error) return <div className="loading">Failed to load settings</div>;
 
   const globalSettings = settings.data?.global;
   const localSettings = settings.data?.local;
-  const dangerMode = globalSettings?.skipDangerousModePermissionPrompt || localSettings?.skipDangerousModePermissionPrompt
-    || globalSettings?.dangerouslySkipPermissions || localSettings?.dangerouslySkipPermissions;
+  const skipPrompt = globalSettings?.skipDangerousModePermissionPrompt || localSettings?.skipDangerousModePermissionPrompt;
 
-  // Read allow/deny directly from settings (already fetched) — don't depend on perms endpoint for these
-  const fetchedAllow = [
+  const allow = [
     ...(globalSettings?.permissions?.allow || []),
     ...(localSettings?.permissions?.allow || []),
   ];
-  const fetchedDeny = [
+  const deny = [
     ...(globalSettings?.permissions?.deny || []),
     ...(localSettings?.permissions?.deny || []),
   ];
-  // Use local state after first toggle; fall back to fetched values
-  const allow = localPerms?.allow ?? fetchedAllow;
-  const deny = localPerms?.deny ?? fetchedDeny;
   const mcpServers = perms.data?.mcpServers || {};
-
-  async function handleToggle(toolName, newStatus) {
-    const baseAllow = localPerms?.allow ?? fetchedAllow;
-    const baseDeny = localPerms?.deny ?? fetchedDeny;
-    const nextAllow = baseAllow.filter(p => p.replace(/\(.*\)$/, '') !== toolName);
-    const nextDeny = baseDeny.filter(p => p.replace(/\(.*\)$/, '') !== toolName);
-    if (newStatus === 'allowed') nextAllow.push(`${toolName}(*)`);
-    else if (newStatus === 'denied') nextDeny.push(toolName);
-    setLocalPerms({ allow: nextAllow, deny: nextDeny });
-    await window.api.invoke('/api/settings/permissions/update', { tool: toolName, action: ACTION_MAP[newStatus] });
-  }
 
   return (
     <div>
@@ -294,18 +230,23 @@ export default function SettingsView() {
         <p>Global Claude Code configuration</p>
       </div>
 
-      {dangerMode && (
+      {skipPrompt && (
         <div style={{
-          background: 'linear-gradient(135deg, rgba(139,92,246,0.15), rgba(217,119,87,0.15))',
-          border: '1px solid rgba(139,92,246,0.3)',
+          background: 'rgba(217,119,6,0.08)',
+          border: '1px solid rgba(217,119,6,0.2)',
           borderRadius: 'var(--radius)',
           padding: '14px 20px',
           marginBottom: 24,
           display: 'flex', alignItems: 'center', gap: 12,
-          fontSize: 13.5, fontWeight: 600, color: 'var(--text)',
+          fontSize: 13, color: 'var(--text)',
         }}>
-          <span style={{ fontSize: 22 }}>⚡</span>
-          dangerouslySkipPermissions is on. Yay, you're awesome.
+          <span style={{ fontSize: 18 }}>⚠</span>
+          <div>
+            <span style={{ fontWeight: 600 }}>skipDangerousModePermissionPrompt</span> is on.
+            <span style={{ color: 'var(--text-secondary)', marginLeft: 6 }}>
+              Sessions launched with <code style={{ fontSize: 12 }}>--dangerously-skip-permissions</code> won't show the safety confirmation.
+            </span>
+          </div>
         </div>
       )}
 
@@ -316,11 +257,11 @@ export default function SettingsView() {
         <div className="json-view">
           <h3 style={{ marginBottom: 4 }}>Built-in Tools</h3>
           <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 14 }}>
-            Every tool Claude Code can use. Status is derived from your allow/deny lists — anything not listed will prompt you at runtime.
+            Current permission status for each tool. Use the prompt below to modify these in a Claude Code session.
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {BUILTIN_TOOLS.map(t => (
-              <ToolRow key={t.name} name={t.name} desc={t.desc} allow={allow} deny={deny} onToggle={handleToggle} />
+              <ToolRow key={t.name} name={t.name} desc={t.desc} allow={allow} deny={deny} />
             ))}
           </div>
         </div>
@@ -353,8 +294,7 @@ export default function SettingsView() {
                   const info = installs?.[0] || {};
                   const date = info.installedAt ? new Date(info.installedAt).toLocaleDateString() : null;
                   return (
-                    <div key={key} style={{
-                      background: 'rgba(139,92,246,0.05)', border: '1px solid rgba(139,92,246,0.15)',
+                    <div key={key} className="plugin-card" style={{
                       borderRadius: 'var(--radius-sm)', padding: '10px 14px',
                       display: 'flex', alignItems: 'center', gap: 12,
                     }}>
@@ -376,6 +316,12 @@ export default function SettingsView() {
             </div>
           );
         })()}
+
+        <PromptCard
+          title="Change permissions"
+          description="Copy this prompt into a Claude Code session to update your tool permissions."
+          prompt={PERMISSIONS_PROMPT}
+        />
 
         {globalSettings && (
           <div className="json-view">

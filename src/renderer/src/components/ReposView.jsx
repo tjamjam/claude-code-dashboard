@@ -14,6 +14,7 @@ function CopyButton({ text, label }) {
   const [copied, setCopied] = useState(false);
   return (
     <button
+      className={`btn-copy${copied ? ' copied' : ''}`}
       onClick={(e) => {
         e.stopPropagation();
         navigator.clipboard.writeText(text).then(() => {
@@ -25,9 +26,6 @@ function CopyButton({ text, label }) {
         padding: '5px 12px',
         fontSize: 11.5,
         fontWeight: 600,
-        background: copied ? 'rgba(16,185,129,0.12)' : 'var(--bg-card)',
-        color: copied ? '#059669' : 'var(--text-secondary)',
-        border: `1px solid ${copied ? 'rgba(16,185,129,0.3)' : 'var(--border)'}`,
         borderRadius: 100,
         cursor: 'pointer',
         transition: 'all 0.15s',
@@ -42,35 +40,32 @@ function CopyButton({ text, label }) {
 
 function ServerBadge({ server, onKill, onOpen }) {
   return (
-    <div style={{
+    <div className="status-allowed" style={{
       display: 'flex', alignItems: 'center', gap: 8,
       padding: '6px 10px',
-      background: 'rgba(16,185,129,0.06)',
-      border: '1px solid rgba(16,185,129,0.18)',
       borderRadius: 'var(--radius-sm)',
     }}>
-      <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#22c55e', flexShrink: 0 }} />
+      <span className="server-dot" style={{ width: 6, height: 6, borderRadius: '50%', flexShrink: 0 }} />
       <a
         href="#"
         onClick={e => { e.preventDefault(); e.stopPropagation(); onOpen(server.port); }}
+        className="server-port"
         style={{
           fontFamily: "'SF Mono','Fira Code',monospace", fontSize: 12, fontWeight: 600,
-          color: '#059669', textDecoration: 'none',
+          textDecoration: 'none',
         }}
       >
         :{server.port}
       </a>
       <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{server.command}</span>
       <button
+        className="btn-danger"
         onClick={e => { e.stopPropagation(); onKill(server.pid); }}
         style={{
           marginLeft: 'auto', padding: '2px 8px', fontSize: 11, fontWeight: 600,
-          background: 'rgba(239,68,68,0.08)', color: '#dc2626',
-          border: '1px solid rgba(239,68,68,0.18)', borderRadius: 100, cursor: 'pointer',
+          borderRadius: 100, cursor: 'pointer',
           transition: 'background 0.12s',
         }}
-        onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.18)'}
-        onMouseLeave={e => e.currentTarget.style.background = 'rgba(239,68,68,0.08)'}
       >
         Stop
       </button>
@@ -289,13 +284,14 @@ function RepoDetail({ repo, servers, onKill, onOpen, onBack }) {
 }
 
 export default function ReposView() {
-  const { data, loading } = useApi('/repos');
+  const { data, loading, error } = useApi('/repos');
   const servers = useApi('/dev-servers');
   const [selected, setSelected] = useState(null);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all'); // 'all' | 'configured' | 'vanilla'
 
   if (loading) return <div className="loading">Loading</div>;
+  if (error) return <div className="loading">Failed to load repos</div>;
   if (!data?.length) return (
     <div>
       <div className="section-header">
@@ -404,15 +400,15 @@ export default function ReposView() {
                         href="#"
                         onClick={e => { e.preventDefault(); e.stopPropagation(); openPort(s.port); }}
                         title={`${s.command} on port ${s.port} (PID ${s.pid})`}
+                        className="server-port-badge"
                         style={{
                           display: 'flex', alignItems: 'center', gap: 4,
                           padding: '2px 8px', borderRadius: 100, fontSize: 11, fontWeight: 600,
                           fontFamily: "'SF Mono','Fira Code',monospace",
-                          background: 'rgba(16,185,129,0.1)', color: '#059669',
-                          textDecoration: 'none', border: '1px solid rgba(16,185,129,0.2)',
+                          textDecoration: 'none',
                         }}
                       >
-                        <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#22c55e' }} />
+                        <span className="server-dot" style={{ width: 5, height: 5, borderRadius: '50%' }} />
                         :{s.port}
                       </a>
                     ))}

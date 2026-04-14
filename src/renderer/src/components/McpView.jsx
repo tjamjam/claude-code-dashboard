@@ -3,11 +3,8 @@ import PromptCard from './PromptCard';
 
 const MCP_PROMPT = `Review my installed MCP servers and their configurations. Check which ones are actively connected, whether their permissions are correctly scoped, and if there are useful MCP servers I'm missing. Suggest any configuration improvements.`;
 
-const STATUS_STYLES = {
-  allowed: { bg: 'rgba(16,185,129,0.08)', border: 'rgba(16,185,129,0.2)', badge: '#059669', badgeBg: 'rgba(16,185,129,0.12)', label: 'Allowed' },
-  denied:  { bg: 'rgba(239,68,68,0.06)',  border: 'rgba(239,68,68,0.2)',  badge: '#dc2626', badgeBg: 'rgba(239,68,68,0.1)',  label: 'Denied' },
-  default: { bg: 'var(--bg)',             border: 'var(--border)',         badge: '#9ca3af', badgeBg: 'var(--border-light)', label: 'Prompts you' },
-};
+const STATUS_LABELS = { allowed: 'Allowed', denied: 'Denied', default: 'Prompts you' };
+const STATUS_CLASSES = { allowed: 'status-allowed', denied: 'status-denied', default: 'status-default' };
 
 function getServerPermission(serverKey, allow, deny) {
   const wildcard = `mcp__${serverKey}__*`;
@@ -17,15 +14,12 @@ function getServerPermission(serverKey, allow, deny) {
 }
 
 function ServerCard({ serverKey, info, status }) {
-  const style = STATUS_STYLES[status];
   const config = info.config || {};
   const isRemote = config.type === 'http' || config.url;
   const connectionType = isRemote ? 'HTTP' : 'Local';
 
   return (
-    <div style={{
-      background: style.bg,
-      border: `1px solid ${style.border}`,
+    <div className={STATUS_CLASSES[status]} style={{
       borderRadius: 'var(--radius)',
       padding: '16px 20px',
     }}>
@@ -45,22 +39,21 @@ function ServerCard({ serverKey, info, status }) {
             {info.registry}
           </span>
         </div>
-        <span style={{
+        <span className="status-badge" style={{
           fontSize: 11, fontWeight: 600,
-          color: style.badge, background: style.badgeBg,
           padding: '3px 10px', borderRadius: 100,
         }}>
-          {style.label}
+          {STATUS_LABELS[status]}
         </span>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)', width: 80 }}>Type</span>
-          <span style={{
+          <span className={isRemote ? 'accent-badge' : ''} style={{
             fontSize: 11.5, fontFamily: "'SF Mono','Fira Code',monospace",
-            color: isRemote ? '#8b5cf6' : 'var(--text-secondary)',
-            background: isRemote ? 'rgba(139,92,246,0.08)' : 'var(--border-light)',
+            color: isRemote ? undefined : 'var(--text-secondary)',
+            background: isRemote ? undefined : 'var(--border-light)',
             padding: '2px 8px', borderRadius: 4,
           }}>
             {connectionType}
@@ -121,6 +114,7 @@ export default function McpView() {
 
   const loading = perms.loading || settings.loading;
   if (loading) return <div className="loading">Loading</div>;
+  if (perms.error || settings.error) return <div className="loading">Failed to load MCP servers</div>;
 
   const mcpServers = perms.data?.mcpServers || {};
   const entries = Object.entries(mcpServers);

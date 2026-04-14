@@ -40,7 +40,7 @@ Define in `src/main/index.js` before `createWindow()`. Use the safe helpers:
 ## Styling
 
 Design system lives in `src/renderer/src/App.css` as CSS custom properties:
-- Accent: `--accent: #8b5cf6` (purple)
+- Accent: `--accent: #2DD2A9` (teal-green), `--accent-secondary: #2D56D2` (blue-indigo)
 - Cards: `--bg-card`, `--border`, `--radius`, `--shadow`
 - Text hierarchy: `--text`, `--text-secondary`, `--text-tertiary`
 - Status colors: green (`#059669` allowed), red (`#dc2626` denied), amber (`#d97706` warning)

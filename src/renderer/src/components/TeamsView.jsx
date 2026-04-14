@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { useApi } from '../hooks/useApi';
 
 export default function TeamsView() {
-  const { data, loading } = useApi('/teams');
+  const { data, loading, error } = useApi('/teams');
   const [selected, setSelected] = useState(null);
 
   if (loading) return <div className="loading">Loading</div>;
+  if (error) return <div className="loading">Failed to load teams</div>;
   if (!data?.length) return (
     <div>
       <div className="section-header">

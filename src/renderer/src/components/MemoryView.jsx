@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { useApi } from '../hooks/useApi';
 
 export default function MemoryView() {
-  const { data, loading } = useApi('/memory');
+  const { data, loading, error } = useApi('/memory');
   const [expanded, setExpanded] = useState(null);
   const [search, setSearch] = useState('');
 
   if (loading) return <div className="loading">Loading</div>;
+  if (error) return <div className="loading">Failed to load memory</div>;
   if (!data?.length) return (
     <div>
       <div className="section-header">

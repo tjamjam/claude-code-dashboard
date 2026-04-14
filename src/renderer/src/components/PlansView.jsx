@@ -9,11 +9,12 @@ function planDetailPrompt(plan) {
 }
 
 export default function PlansView() {
-  const { data, loading } = useApi('/plans');
+  const { data, loading, error } = useApi('/plans');
   const [selected, setSelected] = useState(null);
   const [search, setSearch] = useState('');
 
   if (loading) return <div className="loading">Loading</div>;
+  if (error) return <div className="loading">Failed to load plans</div>;
 
   if (selected) {
     return (

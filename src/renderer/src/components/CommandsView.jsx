@@ -34,6 +34,7 @@ export default function CommandsView() {
 
   const loading = commands.loading || repos.loading;
   if (loading) return <div className="loading">Loading</div>;
+  if (commands.error || repos.error) return <div className="loading">Failed to load commands</div>;
 
   const globalCommands = commands.data || [];
   const q = search.toLowerCase();
@@ -92,9 +93,7 @@ export default function CommandsView() {
               onChange={e => setSearch(e.target.value)}
             />
           </div>
-          <div style={{
-            background: 'rgba(139,92,246,0.07)',
-            border: '1px solid rgba(139,92,246,0.2)',
+          <div className="accent-box" style={{
             borderRadius: 'var(--radius)',
             padding: '12px 16px',
             fontSize: 12.5,

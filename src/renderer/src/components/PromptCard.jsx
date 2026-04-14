@@ -11,9 +11,8 @@ export default function PromptCard({ title, description, prompt }) {
   }
 
   return (
-    <div style={{
+    <div className="accent-box" style={{
       background: 'var(--bg-card)',
-      border: '1px solid rgba(139,92,246,0.2)',
       borderRadius: 'var(--radius)',
       padding: '20px 24px',
       marginTop: 20,
@@ -28,14 +27,12 @@ export default function PromptCard({ title, description, prompt }) {
           </div>
         </div>
         <button
+          className={`btn-accent${copied ? ' copied' : ''}`}
           onClick={copy}
           style={{
             padding: '7px 16px',
             fontSize: 12,
             fontWeight: 600,
-            background: copied ? 'rgba(16,185,129,0.12)' : 'rgba(139,92,246,0.1)',
-            color: copied ? '#059669' : '#7c3aed',
-            border: `1px solid ${copied ? 'rgba(16,185,129,0.3)' : 'rgba(139,92,246,0.25)'}`,
             borderRadius: 100,
             cursor: 'pointer',
             transition: 'all 0.15s',

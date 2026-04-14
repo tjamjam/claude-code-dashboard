@@ -7,9 +7,12 @@
   "scripts": {
     "dev": "electron-vite dev",
     "build": "electron-vite build",
-    "package": "npm run build && electron-builder --mac"
+    "package": "npm run build && electron-builder --mac --x64 --arm64",
+    "package:dmg": "npm run build && electron-builder --mac dmg",
+    "package:mas": "npm run build && electron-builder --mac mas"
   },
   "dependencies": {
+    "@fontsource/inter": "^5.2.8",
     "gray-matter": "^4.0.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

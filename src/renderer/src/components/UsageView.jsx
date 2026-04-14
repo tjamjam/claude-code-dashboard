@@ -1,14 +1,15 @@
 import { useApi } from '../hooks/useApi';
 
 export default function UsageView() {
-  const { data, loading } = useApi('/usage');
+  const { data, loading, error } = useApi('/usage');
 
   if (loading) return <div className="loading">Loading</div>;
+  if (error) return <div className="loading">Failed to load usage data</div>;
 
   return (
     <div>
       <div className="section-header">
-        <h1>Insights</h1>
+        <h1>Self-Improvement</h1>
         <p>
           {data?.dateFrom && data?.dateTo
             ? `${data.dateFrom} → ${data.dateTo} · ${data.totalSessions} sessions · ${data.totalCommits} commits`
@@ -25,7 +26,7 @@ export default function UsageView() {
             border: 'none',
             borderRadius: 'var(--radius)',
           }}
-          sandbox="allow-scripts allow-same-origin"
+          sandbox="allow-scripts"
         />
       ) : (
         <div style={{

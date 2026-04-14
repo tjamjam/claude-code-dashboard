@@ -1,6 +1,8 @@
 node_modules/
 dist/
 out/
+build/
 *.dmg
 *.app
 .DS_Store
+.env

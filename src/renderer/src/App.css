@@ -517,3 +517,227 @@ body {
   font-size: 11px;
   color: var(--text-tertiary);
 }
+
+/* ── Status & accent utility classes ─────────────────────────────────── */
+
+.status-allowed {
+  background: rgba(16,185,129,0.08);
+  border: 1px solid rgba(16,185,129,0.2);
+}
+
+.status-allowed .status-badge {
+  color: #059669;
+  background: rgba(16,185,129,0.12);
+}
+
+.status-denied {
+  background: rgba(239,68,68,0.06);
+  border: 1px solid rgba(239,68,68,0.2);
+}
+
+.status-denied .status-badge {
+  color: #dc2626;
+  background: rgba(239,68,68,0.1);
+}
+
+.status-default {
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+
+.status-default .status-badge {
+  color: #9ca3af;
+  background: var(--border-light);
+}
+
+.status-warning {
+  background: rgba(245,158,11,0.07);
+  border: 1px solid rgba(245,158,11,0.3);
+}
+
+.status-warning .status-icon { color: #d97706; }
+.status-warning .status-text { color: #92400e; }
+
+.accent-box {
+  background: rgba(45,210,169,0.07);
+  border: 1px solid rgba(45,210,169,0.2);
+}
+
+.accent-badge {
+  background: rgba(45,210,169,0.1);
+  color: var(--accent);
+}
+
+.tag-accent { background: rgba(45,210,169,0.1); color: var(--accent); }
+.tag-green  { background: rgba(16,185,129,0.1); color: #059669; }
+.tag-red    { background: rgba(239,68,68,0.1);  color: #dc2626; }
+.tag-gray   { background: var(--border-light);   color: var(--text-tertiary); }
+
+.insight-info    { background: rgba(45,210,169,0.07); border: 1px solid rgba(45,210,169,0.2); }
+.insight-info .insight-icon { color: var(--accent); }
+.insight-warning { background: rgba(245,158,11,0.07); border: 1px solid rgba(245,158,11,0.3); }
+.insight-warning .insight-icon { color: #d97706; }
+.insight-tip     { background: rgba(16,185,129,0.07); border: 1px solid rgba(16,185,129,0.25); }
+.insight-tip .insight-icon { color: #059669; }
+
+.server-dot { background: #22c55e; }
+.server-port { color: #059669; }
+.server-port-badge {
+  background: rgba(16,185,129,0.1);
+  color: #059669;
+  border: 1px solid rgba(16,185,129,0.2);
+}
+.server-port-badge .server-dot { background: #22c55e; }
+
+.btn-copy {
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
+.btn-copy.copied {
+  background: rgba(16,185,129,0.12);
+  color: #059669;
+  border-color: rgba(16,185,129,0.3);
+}
+
+.btn-accent {
+  background: rgba(45,210,169,0.1);
+  color: var(--accent);
+  border: 1px solid rgba(45,210,169,0.25);
+}
+
+.btn-accent.copied {
+  background: rgba(16,185,129,0.12);
+  color: #059669;
+  border-color: rgba(16,185,129,0.3);
+}
+
+.btn-danger {
+  background: rgba(239,68,68,0.08);
+  color: #dc2626;
+  border: 1px solid rgba(239,68,68,0.18);
+}
+
+.btn-danger:hover {
+  background: rgba(239,68,68,0.18);
+}
+
+.plugin-card {
+  background: rgba(45,210,169,0.05);
+  border: 1px solid rgba(45,210,169,0.15);
+}
+
+.error-text { color: #dc2626; }
+.warning-text { color: #d97706; }
+
+/* ── Dark mode ───────────────────────────────────────────────────────── */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1a1b23;
+    --bg-card: #23242e;
+    --text: #e4e5eb;
+    --text-secondary: #9ca3af;
+    --text-tertiary: #6b7280;
+    --border: #32333d;
+    --border-light: #2a2b35;
+    --shadow: 0 1px 3px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.15);
+    --shadow-lg: 0 4px 12px rgba(0,0,0,0.3);
+    --accent-soft: rgba(15,163,126,0.15);
+  }
+
+  .status-allowed {
+    background: rgba(16,185,129,0.12);
+    border-color: rgba(16,185,129,0.3);
+  }
+  .status-allowed .status-badge {
+    color: #34d399;
+    background: rgba(16,185,129,0.18);
+  }
+
+  .status-denied {
+    background: rgba(239,68,68,0.1);
+    border-color: rgba(239,68,68,0.3);
+  }
+  .status-denied .status-badge {
+    color: #f87171;
+    background: rgba(239,68,68,0.15);
+  }
+
+  .status-warning {
+    background: rgba(245,158,11,0.12);
+    border-color: rgba(245,158,11,0.4);
+  }
+  .status-warning .status-icon { color: #fbbf24; }
+  .status-warning .status-text { color: #fbbf24; }
+
+  .accent-box {
+    background: rgba(45,210,169,0.1);
+    border-color: rgba(45,210,169,0.25);
+  }
+
+  .accent-badge {
+    background: rgba(45,210,169,0.15);
+  }
+
+  .tag-accent { background: rgba(45,210,169,0.15); }
+  .tag-green  { background: rgba(16,185,129,0.15); color: #34d399; }
+  .tag-red    { background: rgba(239,68,68,0.15);  color: #f87171; }
+
+  .insight-info    { background: rgba(45,210,169,0.1);  border-color: rgba(45,210,169,0.25); }
+  .insight-warning { background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.4); }
+  .insight-warning .insight-icon { color: #fbbf24; }
+  .insight-tip     { background: rgba(16,185,129,0.1);  border-color: rgba(16,185,129,0.3); }
+  .insight-tip .insight-icon { color: #34d399; }
+
+  .server-port { color: #34d399; }
+  .server-port-badge {
+    background: rgba(16,185,129,0.15);
+    color: #34d399;
+    border-color: rgba(16,185,129,0.3);
+  }
+
+  .btn-copy.copied {
+    background: rgba(16,185,129,0.18);
+    color: #34d399;
+    border-color: rgba(16,185,129,0.4);
+  }
+
+  .btn-accent {
+    background: rgba(45,210,169,0.15);
+    border-color: rgba(45,210,169,0.35);
+  }
+
+  .btn-accent.copied {
+    background: rgba(16,185,129,0.18);
+    color: #34d399;
+    border-color: rgba(16,185,129,0.4);
+  }
+
+  .btn-danger {
+    background: rgba(239,68,68,0.12);
+    color: #f87171;
+    border-color: rgba(239,68,68,0.25);
+  }
+
+  .btn-danger:hover {
+    background: rgba(239,68,68,0.25);
+  }
+
+  .plugin-card {
+    background: rgba(45,210,169,0.08);
+    border-color: rgba(45,210,169,0.2);
+  }
+
+  .error-text { color: #f87171; }
+  .warning-text { color: #fbbf24; }
+
+  .badge {
+    background: rgba(45, 86, 210, 0.12);
+  }
+
+  .search-bar input:focus {
+    box-shadow: 0 0 0 3px rgba(45, 210, 169, 0.15);
+  }
+}

@@ -5,10 +5,31 @@ directories:
 files:
   - out/**/*
   - package.json
+
+# --- Direct distribution (signed + notarized DMG) ---
 mac:
   target:
     - target: dmg
       arch: arm64
+    - target: mas
+      arch: arm64
   icon: build/icon.icns
+  hardenedRuntime: true
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  notarize: true
+  electronLanguages: [en]
+  extendInfo:
+    ITSAppUsesNonExemptEncryption: false
+    ElectronTeamID: 22RP33YBSZ
+
 dmg:
   title: Claude Code Dashboard
+
+# --- Mac App Store ---
+mas:
+  entitlements: build/entitlements.mas.plist
+  entitlementsInherit: build/entitlements.mas.inherit.plist
+  category: public.app-category.developer-tools
+  type: distribution
+  provisioningProfile: build/embedded.provisionprofile

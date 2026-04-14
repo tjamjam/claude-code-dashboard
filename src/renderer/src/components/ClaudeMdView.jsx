@@ -6,9 +6,10 @@ const CLAUDE_MD_CREATE_PROMPT = `Generate a global ~/.claude/CLAUDE.md for me. F
 const CLAUDE_MD_IMPROVE_PROMPT = `Analyze my ~/.claude/CLAUDE.md and suggest improvements. Read my recent git history across active repos and any project-level CLAUDE.md files to find: 1) Important patterns or conventions missing from the global file, 2) Outdated or irrelevant instructions to remove, 3) Anything that would make Claude more effective across all my projects. Then update ~/.claude/CLAUDE.md with your recommended changes.`;
 
 export default function ClaudeMdView() {
-  const { data, loading } = useApi('/claude-md');
+  const { data, loading, error } = useApi('/claude-md');
 
   if (loading) return <div className="loading">Loading</div>;
+  if (error) return <div className="loading">Failed to load CLAUDE.md</div>;
 
   const content = data?.global;
 
