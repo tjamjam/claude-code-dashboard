@@ -1,5 +1,14 @@
 import { useState } from 'react';
 import { useApi } from '../hooks/useApi';
+import PromptCard from './PromptCard';
+
+function repoSetupPrompt(repo) {
+  return `I'm in the ${repo.name} repo at ${repo.path}. Analyze the codebase — look at the languages used, project structure, package.json/Cargo.toml/etc., and recent git history. Then set up Claude Code for this project: create a CLAUDE.md with project-specific conventions and context, and if the project would benefit from custom skills or commands, create those too in .claude/skills/ or .claude/commands/.`;
+}
+
+function repoAuditPrompt(repo) {
+  return `Audit the Claude Code setup for ${repo.name} at ${repo.path}. Review the existing CLAUDE.md, skills, commands, agents, and settings. Suggest what to add, update, or remove to make Claude more effective in this project.`;
+}
 
 function RepoDetail({ repo, onBack }) {
   const [tab, setTab] = useState('overview');
@@ -73,6 +82,13 @@ function RepoDetail({ repo, onBack }) {
                 <pre>{JSON.stringify(repo.hooks, null, 2)}</pre>
               </div>
             )}
+            <PromptCard
+              title={repo.hasConfig ? 'Audit this repo\'s Claude setup' : `Set up Claude Code for ${repo.name}`}
+              description={repo.hasConfig
+                ? 'Ask Claude Code to review what\'s configured and suggest improvements.'
+                : 'Ask Claude Code to analyze the codebase and create a CLAUDE.md, skills, and commands tailored to this project.'}
+              prompt={repo.hasConfig ? repoAuditPrompt(repo) : repoSetupPrompt(repo)}
+            />
           </div>
         )}
 
