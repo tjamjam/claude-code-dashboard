@@ -27,11 +27,74 @@ const INSIGHT_COLORS = {
   tip:     { bg: 'rgba(16,185,129,0.07)', border: 'rgba(16,185,129,0.25)', icon: '#059669' },
 };
 
+function ModelBanner({ model }) {
+  if (!model) return null;
+  const m = model.toLowerCase();
+  const isOpus = m.includes('opus');
+  const isHaiku = m.includes('haiku');
+  const isSonnet = m.includes('sonnet');
+
+  if (isOpus) return null;
+
+  const display = model.replace('claude-', '').replace(/-/g, ' ');
+
+  if (isHaiku) {
+    return (
+      <div style={{
+        background: 'linear-gradient(135deg, rgba(239,68,68,0.18), rgba(220,38,38,0.12))',
+        border: '2px solid rgba(239,68,68,0.4)',
+        borderRadius: 'var(--radius)',
+        padding: '16px 20px',
+        marginBottom: 24,
+        lineHeight: 1.6,
+      }}>
+        <div style={{ fontSize: 22, marginBottom: 6 }}>&#x1F6A8;</div>
+        <div style={{ fontWeight: 700, fontSize: 14, color: '#dc2626', marginBottom: 4 }}>
+          Haiku? Seriously?
+        </div>
+        <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+          You're running <strong style={{ color: 'var(--text)' }}>{display}</strong>.
+          That's the model people use to parse JSON, not build software.
+          You have Opus. You're paying for Opus. Use Opus.
+          Run <code>/model</code> and fix this immediately.
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{
+      background: 'linear-gradient(135deg, rgba(245,158,11,0.12), rgba(217,119,6,0.08))',
+      border: '1px solid rgba(245,158,11,0.35)',
+      borderRadius: 'var(--radius)',
+      padding: '14px 20px',
+      marginBottom: 24,
+      display: 'flex', alignItems: 'flex-start', gap: 14,
+      lineHeight: 1.6,
+    }}>
+      <span style={{ fontSize: 20, flexShrink: 0 }}>&#x1F928;</span>
+      <div>
+        <div style={{ fontWeight: 700, fontSize: 13.5, color: '#d97706', marginBottom: 2 }}>
+          Why are you not on Opus?
+        </div>
+        <div style={{ fontSize: 12.5, color: 'var(--text-secondary)' }}>
+          You're running <strong style={{ color: 'var(--text)' }}>{display}</strong>.
+          {isSonnet ? " Sonnet is great for quick stuff, but you deserve the full thing." : ""}
+          {' '}Switch to Opus with <code>/model</code> — you'll wonder why you ever settled.
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Overview({ onNavigate }) {
   const { data, loading } = useApi('/overview');
   const { data: insights, loading: insightsLoading } = useApi('/insights');
+  const { data: settings } = useApi('/settings');
 
   if (loading) return <div className="loading">Loading</div>;
+
+  const model = settings?.global?.model || settings?.local?.model || null;
 
   return (
     <div>
@@ -39,6 +102,8 @@ export default function Overview({ onNavigate }) {
         <h1>Overview</h1>
         <p>Your Claude Code configuration at a glance</p>
       </div>
+
+      <ModelBanner model={model} />
 
       <div className="overview-group-label">Global (~/.claude/)</div>
       <div className="stat-grid" style={{ marginBottom: 24 }}>
