@@ -10,6 +10,36 @@ function repoAuditPrompt(repo) {
   return `Audit the Claude Code setup for ${repo.name} at ${repo.path}. Review the existing CLAUDE.md, skills, commands, agents, and settings. Suggest what to add, update, or remove to make Claude more effective in this project.`;
 }
 
+function CopyButton({ text, label }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        navigator.clipboard.writeText(text).then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        });
+      }}
+      style={{
+        padding: '5px 12px',
+        fontSize: 11.5,
+        fontWeight: 600,
+        background: copied ? 'rgba(16,185,129,0.12)' : 'var(--bg-card)',
+        color: copied ? '#059669' : 'var(--text-secondary)',
+        border: `1px solid ${copied ? 'rgba(16,185,129,0.3)' : 'var(--border)'}`,
+        borderRadius: 100,
+        cursor: 'pointer',
+        transition: 'all 0.15s',
+        whiteSpace: 'nowrap',
+        fontFamily: "'SF Mono','Fira Code',monospace",
+      }}
+    >
+      {copied ? 'Copied!' : label}
+    </button>
+  );
+}
+
 function RepoDetail({ repo, onBack }) {
   const [tab, setTab] = useState('overview');
 
@@ -65,9 +95,13 @@ function RepoDetail({ repo, onBack }) {
       <div className="detail-body">
         {tab === 'overview' && (
           <div>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '13px', marginBottom: '16px' }}>
-              {repo.path}
-            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '13px', margin: 0, flex: 1, fontFamily: "'SF Mono','Fira Code',monospace" }}>
+                {repo.path}
+              </p>
+              <CopyButton text={`cd ${repo.path} && claude`} label="cd && claude" />
+              <CopyButton text={repo.path} label="Copy path" />
+            </div>
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '20px' }}>
               {repo.configItems.map(item => (
                 <span key={item} className="badge">{item}</span>
