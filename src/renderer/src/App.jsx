@@ -10,6 +10,7 @@ import SettingsView from './components/SettingsView';
 import CommandsView from './components/CommandsView';
 import ReposView from './components/ReposView';
 import ClaudeMdView from './components/ClaudeMdView';
+import UsageView from './components/UsageView';
 
 const SECTIONS = {
   overview:  { label: 'Overview',   icon: '\u2302', component: Overview },
@@ -21,6 +22,7 @@ const SECTIONS = {
   plans:     { label: 'Plans',      icon: '\u2637', component: PlansView },
   commands:  { label: 'Commands',   icon: '\u276F', component: CommandsView },
   'claude-md': { label: 'CLAUDE.md', icon: '\u2767', component: ClaudeMdView },
+  usage:     { label: 'Insights',   icon: '\u25F0', component: UsageView },
   settings:  { label: 'Settings',   icon: '\u2638', component: SettingsView },
 };
 

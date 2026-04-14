@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { join } from 'path'
 import os from 'os'
 import fs from 'fs'
@@ -136,14 +136,15 @@ ipcMain.handle('/api/insights', () => {
   // Dangerous permissions
   const allowed = settings?.permissions?.allow || []
   const hasBroadBash = allowed.some(t => t === 'Bash' || t === 'Bash(*)')
-  if (hasBroadBash || settings?.dangerouslySkipPermissions) {
+  const skipPrompt = settings?.skipDangerousModePermissionPrompt || settings?.dangerouslySkipPermissions
+  if (hasBroadBash || skipPrompt) {
     insights.push({
       id: 'broad-perms',
       type: 'warning',
       title: 'Broad permissions active',
       message: hasBroadBash
         ? 'Bash(*) allows all shell commands without prompting. Consider scoping to specific patterns.'
-        : 'dangerouslySkipPermissions is enabled — Claude will not ask before running tools.'
+        : 'skipDangerousModePermissionPrompt is enabled — Claude will not ask before running tools.'
     })
   }
 
@@ -471,6 +472,129 @@ ipcMain.handle('/api/repos', () => {
     return repos
   } catch {
     return []
+  }
+})
+
+// Permission matrix
+ipcMain.handle('/api/permissions', () => {
+  const settings = safeJSON(join(CLAUDE_DIR, 'settings.json'))
+  const local = safeJSON(join(CLAUDE_DIR, 'settings.local.json'))
+
+  const allow = [
+    ...(settings?.permissions?.allow || []),
+    ...(local?.permissions?.allow || [])
+  ]
+  const deny = [
+    ...(settings?.permissions?.deny || []),
+    ...(local?.permissions?.deny || [])
+  ]
+
+  // Collect installed plugin MCP servers
+  // Cache dir structure: plugins/cache/[registry]/[plugin]/[version]/.mcp.json
+  const cacheDir = join(CLAUDE_DIR, 'plugins', 'cache')
+  const mcpServers = {}
+  for (const registry of dirs(cacheDir)) {
+    for (const plugin of dirs(join(cacheDir, registry))) {
+      for (const version of dirs(join(cacheDir, registry, plugin))) {
+        const mcpConfig = safeJSON(join(cacheDir, registry, plugin, version, '.mcp.json'))
+        if (!mcpConfig) continue
+        // .mcp.json may use top-level keys directly (not nested under mcpServers)
+        const servers = mcpConfig.mcpServers || mcpConfig
+        for (const [serverKey, serverConfig] of Object.entries(servers)) {
+          if (typeof serverConfig !== 'object') continue
+          // Claude Code namespaces plugin MCP tools as: plugin_[pluginname]_[serverkey]
+          const pluginPrefix = `plugin_${plugin}_${serverKey}`
+          mcpServers[pluginPrefix] = {
+            plugin,
+            registry,
+            serverKey,
+            config: serverConfig
+          }
+        }
+      }
+    }
+  }
+
+  return { allow, deny, mcpServers }
+})
+
+// Open external URL (for opening report.html in browser)
+ipcMain.handle('open-external', (_, url) => shell.openExternal(url))
+
+// Usage data
+ipcMain.handle('/api/usage', () => {
+  const usageDir = join(CLAUDE_DIR, 'usage-data')
+  const reportPath = join(usageDir, 'report.html')
+  const hasReport = fs.existsSync(reportPath)
+
+  // Aggregate session-meta
+  const metaDir = join(usageDir, 'session-meta')
+  const metaFiles = files(metaDir, '.json')
+  let totalMessages = 0, totalCommits = 0, totalMinutes = 0
+  const toolTotals = {}, projectCounts = {}, dates = []
+  for (const f of metaFiles) {
+    const m = safeJSON(join(metaDir, f))
+    if (!m) continue
+    totalMessages += (m.user_message_count || 0) + (m.assistant_message_count || 0)
+    totalCommits += m.git_commits || 0
+    totalMinutes += m.duration_minutes || 0
+    if (m.start_time) dates.push(m.start_time)
+    for (const [tool, count] of Object.entries(m.tool_counts || {})) {
+      toolTotals[tool] = (toolTotals[tool] || 0) + count
+    }
+    if (m.project_path) {
+      const name = m.project_path.split('/').pop()
+      projectCounts[name] = (projectCounts[name] || 0) + 1
+    }
+  }
+
+  // Top tools
+  const topTools = Object.entries(toolTotals)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8)
+    .map(([name, count]) => ({ name, count }))
+
+  // Top projects
+  const topProjects = Object.entries(projectCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8)
+    .map(([name, count]) => ({ name, count }))
+
+  // Date range
+  dates.sort()
+  const dateFrom = dates[0] ? dates[0].slice(0, 10) : null
+  const dateTo = dates[dates.length - 1] ? dates[dates.length - 1].slice(0, 10) : null
+
+  // Aggregate facets
+  const facetsDir = join(usageDir, 'facets')
+  const facetFiles = files(facetsDir, '.json')
+  const outcomes = {}, frictionCats = {}
+  for (const f of facetFiles) {
+    const facet = safeJSON(join(facetsDir, f))
+    if (!facet) continue
+    if (facet.outcome) outcomes[facet.outcome] = (outcomes[facet.outcome] || 0) + 1
+    for (const [cat, count] of Object.entries(facet.friction_counts || {})) {
+      frictionCats[cat] = (frictionCats[cat] || 0) + count
+    }
+  }
+
+  const reportHtml = hasReport ? safeRead(reportPath) : null
+
+  return {
+    hasReport,
+    reportPath,
+    reportHtml,
+    totalSessions: metaFiles.length,
+    analyzedSessions: facetFiles.length,
+    totalMessages,
+    totalCommits,
+    totalHours: Math.round(totalMinutes / 60),
+    dateFrom,
+    dateTo,
+    topTools,
+    topProjects,
+    outcomes,
+    frictionCats,
   }
 })
 
