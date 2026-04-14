@@ -26,19 +26,21 @@ export default function ClaudeMdView() {
           </div>
         </div>
       ) : (
-        <div className="empty-state">
-          <div style={{ fontSize: 32, marginBottom: 12 }}>📄</div>
-          <div style={{ fontWeight: 600, marginBottom: 6 }}>No global CLAUDE.md found</div>
-          <div style={{ fontSize: 13, maxWidth: 400, margin: '0 auto', lineHeight: 1.6 }}>
-            Create <code>~/.claude/CLAUDE.md</code> to give Claude persistent instructions,
-            your preferred working style, and context that applies across every project.
+        <>
+          <div className="empty-state">
+            <div style={{ fontSize: 32, marginBottom: 12 }}>📄</div>
+            <div style={{ fontWeight: 600, marginBottom: 6 }}>No global CLAUDE.md found</div>
+            <div style={{ fontSize: 13, maxWidth: 400, margin: '0 auto', lineHeight: 1.6 }}>
+              Create <code>~/.claude/CLAUDE.md</code> to give Claude persistent instructions,
+              your preferred working style, and context that applies across every project.
+            </div>
           </div>
-        </div>
-        <PromptCard
-          title="Generate your CLAUDE.md"
-          description="Ask Claude Code to analyze your projects and write a global CLAUDE.md tailored to how you work."
-          prompt={CLAUDE_MD_PROMPT}
-        />
+          <PromptCard
+            title="Generate your CLAUDE.md"
+            description="Ask Claude Code to analyze your projects and write a global CLAUDE.md tailored to how you work."
+            prompt={CLAUDE_MD_PROMPT}
+          />
+        </>
       )}
     </div>
   );
