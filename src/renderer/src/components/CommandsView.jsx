@@ -43,6 +43,21 @@ export default function CommandsView() {
         <h1>Commands</h1>
         <p>{data.length} command{data.length !== 1 ? 's' : ''}</p>
       </div>
+      <div style={{
+        background: 'rgba(139,92,246,0.07)',
+        border: '1px solid rgba(139,92,246,0.2)',
+        borderRadius: 'var(--radius)',
+        padding: '12px 16px',
+        fontSize: 12.5,
+        color: 'var(--text-secondary)',
+        marginBottom: 20,
+        lineHeight: 1.6,
+      }}>
+        <strong style={{ color: 'var(--text)' }}>Commands vs Skills — </strong>
+        Commands are simple prompt templates stored in <code>~/.claude/commands/</code> and invoked with <code>/name</code>.
+        Skills (in <code>~/.claude/skills/</code>) are structured workflows with metadata, versioning, and references.
+        Both use <code>/name</code> to invoke, but skills are more powerful.
+      </div>
       <div className="card-grid">
         {data.map(cmd => {
           const preview = cmd.content?.slice(0, 120).trim();

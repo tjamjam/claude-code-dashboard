@@ -37,6 +37,28 @@ function files(dirPath, ext) {
   } catch { return [] }
 }
 
+function scanGithubRepos() {
+  const githubDir = join(os.homedir(), 'Documents', 'GitHub')
+  const repos = []
+  try {
+    const entries = fs.readdirSync(githubDir, { withFileTypes: true })
+      .filter(d => d.isDirectory() && !d.name.startsWith('.'))
+    for (const entry of entries) {
+      const p = join(githubDir, entry.name)
+      try {
+        if (fs.statSync(join(p, '.git')).isDirectory()) repos.push(p)
+      } catch {}
+      try {
+        for (const sub of fs.readdirSync(p, { withFileTypes: true }).filter(d => d.isDirectory() && !d.name.startsWith('.'))) {
+          const sp = join(p, sub.name)
+          try { if (fs.statSync(join(sp, '.git')).isDirectory()) repos.push(sp) } catch {}
+        }
+      } catch {}
+    }
+  } catch {}
+  return repos
+}
+
 // Overview stats
 ipcMain.handle('/api/overview', () => {
   const skillCount = dirs(join(CLAUDE_DIR, 'skills')).length
@@ -58,6 +80,20 @@ ipcMain.handle('/api/overview', () => {
     return files(memDir, '.md').length > 0
   }).length
 
+  // Repo-level aggregates
+  const repoPaths = scanGithubRepos()
+  let repoSkills = 0, repoCommands = 0, repoAgents = 0, reposWithConfig = 0
+  for (const rp of repoPaths) {
+    const cd = join(rp, '.claude')
+    const rSkills = dirs(join(cd, 'skills')).length
+    const rCmds = files(join(cd, 'commands'), '.md').filter(f => !f.startsWith('.')).length + dirs(join(cd, 'commands')).length
+    const rAgents = files(join(cd, 'agents'), '.md').length
+    repoSkills += rSkills
+    repoCommands += rCmds
+    repoAgents += rAgents
+    if (rSkills || rCmds || rAgents || fs.existsSync(join(rp, 'CLAUDE.md')) || fs.existsSync(cd)) reposWithConfig++
+  }
+
   return {
     skills: skillCount,
     agents: agentCount,
@@ -65,8 +101,90 @@ ipcMain.handle('/api/overview', () => {
     plans: planCount,
     commands: commandCount,
     projects: projectDirs.length,
-    projectsWithMemory: memoryCount
+    projectsWithMemory: memoryCount,
+    repoSkills,
+    repoCommands,
+    repoAgents,
+    totalRepos: repoPaths.length,
+    reposWithConfig
   }
+})
+
+// Insights
+ipcMain.handle('/api/insights', () => {
+  const insights = []
+  const settings = safeJSON(join(CLAUDE_DIR, 'settings.json'))
+
+  // Model
+  if (settings?.model) {
+    insights.push({ id: 'model', type: 'info', title: 'Active model', message: `You're running ${settings.model} globally.` })
+  }
+
+  // Commands vs skills
+  const cmdDir = join(CLAUDE_DIR, 'commands')
+  const commandCount = files(cmdDir, '.md').filter(f => !f.startsWith('.')).length + dirs(cmdDir).length
+  const skillCount = dirs(join(CLAUDE_DIR, 'skills')).length
+  if (commandCount > 0) {
+    insights.push({
+      id: 'commands-vs-skills',
+      type: 'tip',
+      title: `${commandCount} command${commandCount !== 1 ? 's' : ''} in ~/.claude/commands/`,
+      message: 'Commands are simple prompt templates — not structured skills. Both invoke with /name, but skills have metadata, versioning, and are more powerful. Consider promoting frequently-used commands to skills.'
+    })
+  }
+
+  // Dangerous permissions
+  const allowed = settings?.permissions?.allow || []
+  const hasBroadBash = allowed.some(t => t === 'Bash' || t === 'Bash(*)')
+  if (hasBroadBash || settings?.dangerouslySkipPermissions) {
+    insights.push({
+      id: 'broad-perms',
+      type: 'warning',
+      title: 'Broad permissions active',
+      message: hasBroadBash
+        ? 'Bash(*) allows all shell commands without prompting. Consider scoping to specific patterns.'
+        : 'dangerouslySkipPermissions is enabled — Claude will not ask before running tools.'
+    })
+  }
+
+  // No global CLAUDE.md
+  if (!safeRead(join(CLAUDE_DIR, 'CLAUDE.md'))) {
+    insights.push({
+      id: 'no-claude-md',
+      type: 'tip',
+      title: 'No global CLAUDE.md',
+      message: 'A global CLAUDE.md lets you give Claude persistent instructions and context across every project — role, preferences, conventions.'
+    })
+  }
+
+  // Hooks
+  const hooks = settings?.hooks || {}
+  const hookEvents = Object.keys(hooks)
+  if (hookEvents.length > 0) {
+    const total = Object.values(hooks).reduce((n, v) => n + (Array.isArray(v) ? v.length : 0), 0)
+    insights.push({
+      id: 'hooks',
+      type: 'info',
+      title: `${total} hook${total !== 1 ? 's' : ''} configured`,
+      message: `Automation running on: ${hookEvents.join(', ')}.`
+    })
+  }
+
+  // Repos without config
+  const repoPaths = scanGithubRepos()
+  const noConfig = repoPaths.filter(rp =>
+    !fs.existsSync(join(rp, '.claude')) && !fs.existsSync(join(rp, 'CLAUDE.md'))
+  ).length
+  if (repoPaths.length > 0 && noConfig > 0) {
+    insights.push({
+      id: 'repos-no-config',
+      type: 'tip',
+      title: `${noConfig} of ${repoPaths.length} repos have no Claude config`,
+      message: 'These repos have no CLAUDE.md or .claude/ directory. Adding a CLAUDE.md gives Claude project-specific context.'
+    })
+  }
+
+  return insights
 })
 
 // Skills
