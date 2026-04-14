@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import { useApi } from '../hooks/useApi';
+import PromptCard from './PromptCard';
+
+const AGENTS_PROMPT = `Review my project CLAUDE.md files across ~/Documents/GitHub and my ~/.claude/settings.json. Based on workflows I do frequently, suggest 2–3 specialized sub-agents I should define in ~/.claude/agents/ and write the full .md file for each — include YAML frontmatter with name, description, model, and tools fields, and a system prompt body that gives the agent a specific role and capabilities.`;
 
 export default function AgentsView() {
   const { data, loading } = useApi('/agents');
@@ -12,6 +15,11 @@ export default function AgentsView() {
         <h1>Agents</h1>
         <p>No agent definitions found</p>
       </div>
+      <PromptCard
+        title="Create your first agents"
+        description="No agents defined yet. Ask Claude Code to suggest specialized sub-agents based on your workflow."
+        prompt={AGENTS_PROMPT}
+      />
     </div>
   );
 

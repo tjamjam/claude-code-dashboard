@@ -1,4 +1,7 @@
 import { useApi } from '../hooks/useApi';
+import PromptCard from './PromptCard';
+
+const CLAUDE_MD_PROMPT = `Generate a global ~/.claude/CLAUDE.md for me. First read any CLAUDE.md files in my ~/Documents/GitHub repos, check ~/.claude/settings.json for preferences, and run git log --oneline -10 in my most active repos to understand my coding patterns. Then write a CLAUDE.md that captures my working style, coding conventions, and preferences that should apply across every project — and save it to ~/.claude/CLAUDE.md.`;
 
 export default function ClaudeMdView() {
   const { data, loading } = useApi('/claude-md');
@@ -31,6 +34,11 @@ export default function ClaudeMdView() {
             your preferred working style, and context that applies across every project.
           </div>
         </div>
+        <PromptCard
+          title="Generate your CLAUDE.md"
+          description="Ask Claude Code to analyze your projects and write a global CLAUDE.md tailored to how you work."
+          prompt={CLAUDE_MD_PROMPT}
+        />
       )}
     </div>
   );

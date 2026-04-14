@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import { useApi } from '../hooks/useApi';
+import PromptCard from './PromptCard';
+
+const SKILLS_PROMPT = `Look at my ~/.claude/ directory structure, any commands in ~/.claude/commands/, and CLAUDE.md files in my ~/Documents/GitHub repos. Based on patterns in how I use Claude Code across projects, recommend 3–5 skills I should create and write the full ~/.claude/skills/[name]/SKILL.md file for each one — include YAML frontmatter with name and description fields, and make the skill body an actionable step-by-step prompt.`;
 
 export default function SkillsView() {
   const { data, loading } = useApi('/skills');
@@ -57,20 +60,30 @@ export default function SkillsView() {
           onChange={e => setSearch(e.target.value)}
         />
       </div>
-      <div className="card-grid">
-        {filtered.map(skill => (
-          <div key={skill.id} className="card" onClick={() => setSelected(skill)}>
-            <h3>{skill.name}</h3>
-            <p>{skill.description || 'No description'}</p>
-            {skill.frontmatter?.model && (
-              <div className="card-meta">
-                <span className="badge muted">{skill.frontmatter.model}</span>
+      {(data || []).length === 0 ? (
+        <PromptCard
+          title="Get skill recommendations"
+          description="No skills installed yet. Ask Claude Code to analyze your workflow and suggest skills to create."
+          prompt={SKILLS_PROMPT}
+        />
+      ) : (
+        <>
+          <div className="card-grid">
+            {filtered.map(skill => (
+              <div key={skill.id} className="card" onClick={() => setSelected(skill)}>
+                <h3>{skill.name}</h3>
+                <p>{skill.description || 'No description'}</p>
+                {skill.frontmatter?.model && (
+                  <div className="card-meta">
+                    <span className="badge muted">{skill.frontmatter.model}</span>
+                  </div>
+                )}
               </div>
-            )}
+            ))}
           </div>
-        ))}
-      </div>
-      {filtered.length === 0 && <div className="empty-state">No skills match your search</div>}
+          {filtered.length === 0 && <div className="empty-state">No skills match your search</div>}
+        </>
+      )}
     </div>
   );
 }
