@@ -26,7 +26,6 @@ function ServerCard({ serverKey, info, status }) {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <span style={{
-            fontFamily: "'SF Mono','Fira Code',monospace",
             fontSize: 14, fontWeight: 700, color: 'var(--text)',
           }}>
             {info.plugin}
@@ -51,7 +50,7 @@ function ServerCard({ serverKey, info, status }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)', width: 80 }}>Type</span>
           <span className={isRemote ? 'accent-badge' : ''} style={{
-            fontSize: 11.5, fontFamily: "'SF Mono','Fira Code',monospace",
+            fontSize: 11.5,
             color: isRemote ? undefined : 'var(--text-secondary)',
             background: isRemote ? undefined : 'var(--border-light)',
             padding: '2px 8px', borderRadius: 4,
@@ -64,7 +63,7 @@ function ServerCard({ serverKey, info, status }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)', width: 80 }}>URL</span>
             <span style={{
-              fontSize: 11.5, fontFamily: "'SF Mono','Fira Code',monospace",
+              fontSize: 11.5,
               color: 'var(--text-secondary)',
             }}>
               {config.url}
@@ -76,7 +75,7 @@ function ServerCard({ serverKey, info, status }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)', width: 80 }}>Command</span>
             <span style={{
-              fontSize: 11.5, fontFamily: "'SF Mono','Fira Code',monospace",
+              fontSize: 11.5,
               color: 'var(--text-secondary)',
             }}>
               {config.command} {(config.args || []).join(' ')}
@@ -87,7 +86,7 @@ function ServerCard({ serverKey, info, status }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)', width: 80 }}>Prefix</span>
           <span style={{
-            fontSize: 11.5, fontFamily: "'SF Mono','Fira Code',monospace",
+            fontSize: 11.5,
             color: 'var(--text-tertiary)',
           }}>
             mcp__{serverKey}__*

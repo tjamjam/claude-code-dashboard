@@ -30,7 +30,6 @@ function CopyButton({ text, label }) {
         cursor: 'pointer',
         transition: 'all 0.15s',
         whiteSpace: 'nowrap',
-        fontFamily: "'SF Mono','Fira Code',monospace",
       }}
     >
       {copied ? 'Copied!' : label}
@@ -51,7 +50,7 @@ function ServerBadge({ server, onKill, onOpen }) {
         onClick={e => { e.preventDefault(); e.stopPropagation(); onOpen(server.port); }}
         className="server-port"
         style={{
-          fontFamily: "'SF Mono','Fira Code',monospace", fontSize: 12, fontWeight: 600,
+          fontSize: 12, fontWeight: 600,
           textDecoration: 'none',
         }}
       >
@@ -129,7 +128,7 @@ function RepoDetail({ repo, servers, onKill, onOpen, onBack }) {
         {tab === 'overview' && (
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '13px', margin: 0, flex: 1, fontFamily: "'SF Mono','Fira Code',monospace" }}>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '13px', margin: 0, flex: 1 }}>
                 {repo.path}
               </p>
               <CopyButton text={`cd ${repo.path} && claude --dangerously-skip-permissions`} label="cd && claude --yolo" />
@@ -315,7 +314,7 @@ export default function ReposView() {
         background: 'var(--bg-card)', border: '1px solid var(--border)',
         borderRadius: 'var(--radius-sm)',
       }}>
-        <span style={{ fontSize: 12, color: 'var(--text-tertiary)', fontFamily: "'SF Mono','Fira Code',monospace", flex: 1 }}>
+        <span style={{ fontSize: 12, color: 'var(--text-tertiary)', flex: 1 }}>
           {reposDir}
         </span>
         <button onClick={changeFolder} className="btn-accent" style={{
@@ -383,7 +382,7 @@ export default function ReposView() {
         background: 'var(--bg-card)', border: '1px solid var(--border)',
         borderRadius: 'var(--radius-sm)',
       }}>
-        <span style={{ fontSize: 12, color: 'var(--text-tertiary)', fontFamily: "'SF Mono','Fira Code',monospace", flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <span style={{ fontSize: 12, color: 'var(--text-tertiary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {reposDir}
         </span>
         <button onClick={changeFolder} className="btn-accent" style={{
@@ -448,7 +447,6 @@ export default function ReposView() {
                         style={{
                           display: 'flex', alignItems: 'center', gap: 4,
                           padding: '2px 8px', borderRadius: 100, fontSize: 11, fontWeight: 600,
-                          fontFamily: "'SF Mono','Fira Code',monospace",
                           textDecoration: 'none',
                         }}
                       >

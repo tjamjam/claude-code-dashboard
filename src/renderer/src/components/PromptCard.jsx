@@ -54,7 +54,6 @@ export default function PromptCard({ title, description, prompt }) {
         padding: '12px 14px',
         whiteSpace: 'pre-wrap',
         wordBreak: 'break-word',
-        fontFamily: "'SF Mono','Fira Code',monospace",
       }}>
         {prompt}
       </pre>

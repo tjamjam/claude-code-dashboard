@@ -82,7 +82,6 @@ export default function MemoryView() {
                       padding: '10px',
                       borderRadius: 'var(--radius-sm)',
                       whiteSpace: 'pre-wrap',
-                      fontFamily: "'SF Mono', monospace",
                       lineHeight: 1.5,
                       maxHeight: '200px',
                       overflow: 'auto'
@@ -102,7 +101,6 @@ export default function MemoryView() {
                     padding: '10px',
                     borderRadius: 'var(--radius-sm)',
                     whiteSpace: 'pre-wrap',
-                    fontFamily: "'SF Mono', monospace",
                     lineHeight: 1.5,
                     maxHeight: '300px',
                     overflow: 'auto'

@@ -14,7 +14,6 @@
     "package:mas": "npm run build && electron-builder --mac mas"
   },
   "dependencies": {
-    "@fontsource/inter": "^5.2.8",
     "@fontsource/jetbrains-mono": "^5.2.8",
     "gray-matter": "^4.0.3",
     "react": "^18.3.1",

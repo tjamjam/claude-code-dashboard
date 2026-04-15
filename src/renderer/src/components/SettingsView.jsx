@@ -61,11 +61,11 @@ function ToolRow({ name, desc, allow, deny }) {
     }}>
       <div style={{ flex: 1 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
-          <span style={{ fontFamily: "'SF Mono','Fira Code',monospace", fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>
+          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>
             {name}
           </span>
           {s.scope && s.scope !== '*' && (
-            <span style={{ fontFamily: "'SF Mono','Fira Code',monospace", fontSize: 11, color: 'var(--text-tertiary)', background: 'var(--border-light)', padding: '1px 7px', borderRadius: 100 }}>
+            <span style={{ fontSize: 11, color: 'var(--text-tertiary)', background: 'var(--border-light)', padding: '1px 7px', borderRadius: 100 }}>
               {s.scope}
             </span>
           )}
@@ -94,14 +94,14 @@ function McpServerRow({ serverKey, info, allow, deny }) {
     }}>
       <div style={{ flex: 1 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
-          <span style={{ fontFamily: "'SF Mono','Fira Code',monospace", fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>
+          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>
             {info.plugin}
           </span>
           <span style={{ fontSize: 11, color: 'var(--text-tertiary)', background: 'var(--border-light)', padding: '1px 7px', borderRadius: 100 }}>
             {info.registry}
           </span>
         </div>
-        <div style={{ fontSize: 11.5, color: 'var(--text-tertiary)', fontFamily: "'SF Mono','Fira Code',monospace" }}>
+        <div style={{ fontSize: 11.5, color: 'var(--text-tertiary)' }}>
           mcp__{serverKey}__*
         </div>
       </div>
@@ -116,7 +116,7 @@ const TAG_CLASSES = { accent: 'tag-accent', green: 'tag-green', red: 'tag-red', 
 
 function Tag({ children, color = 'accent' }) {
   return (
-    <span className={TAG_CLASSES[color] || 'tag-accent'} style={{ fontSize: 11.5, fontWeight: 500, padding: '3px 9px', borderRadius: 100, fontFamily: "'SF Mono','Fira Code',monospace" }}>
+    <span className={TAG_CLASSES[color] || 'tag-accent'} style={{ fontSize: 11.5, fontWeight: 500, padding: '3px 9px', borderRadius: 100 }}>
       {children}
     </span>
   );

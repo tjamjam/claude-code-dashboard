@@ -46,7 +46,6 @@ export default function RepoItemsSection({ repos, getItems, renderCard, search }
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
             <span style={{
               fontSize: 12, fontWeight: 600, color: 'var(--text)',
-              fontFamily: "'SF Mono','Fira Code',monospace",
             }}>
               {repo.name}
             </span>

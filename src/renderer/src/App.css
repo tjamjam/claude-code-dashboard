@@ -32,7 +32,7 @@
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'JetBrains Mono', monospace;
   background: var(--bg);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
@@ -302,7 +302,6 @@ body {
 }
 
 .detail-body pre {
-  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
   font-size: 12.5px;
   line-height: 1.65;
   white-space: pre-wrap;
@@ -383,7 +382,6 @@ body {
 }
 
 .json-view pre {
-  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
   font-size: 12px;
   line-height: 1.6;
   background: var(--bg);
