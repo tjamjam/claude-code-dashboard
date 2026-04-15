@@ -2,7 +2,7 @@
 
 A desktop app that gives you a visual command center for your entire [Claude Code](https://docs.anthropic.com/en/docs/claude-code) setup. It reads your `~/.claude/` directory and scans your repos, then shows everything in one place: skills, agents, commands, memory, permissions, MCP servers, plans, teams, and usage insights.
 
-**Download for macOS:** [Download DMG](https://github.com/tjamjam/claude-code-dashboard/releases/latest/download/Claude-Code-Dashboard-universal.dmg)
+**Download for macOS:** [Download DMG](https://github.com/tjamjam/claude-code-dashboard/releases/latest/download/Claude-Code-Dashboard-arm64.dmg)
 
 ![Claude Code Dashboard overview](docs/screenshot.png)
 
