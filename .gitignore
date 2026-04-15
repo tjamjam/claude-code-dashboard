@@ -1,8 +1,10 @@
 node_modules/
 dist/
 out/
-build/
 *.dmg
 *.app
 .DS_Store
 .env
+
+# MAS provisioning profile is machine-specific, don't track
+build/embedded.provisionprofile
