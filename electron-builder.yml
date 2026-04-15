@@ -26,6 +26,7 @@ mac:
 
 dmg:
   title: Claude Code Dashboard
+  artifactName: Claude-Code-Dashboard-${arch}.${ext}
 
 # --- Mac App Store ---
 mas:
