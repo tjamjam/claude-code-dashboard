@@ -284,11 +284,22 @@ function RepoDetail({ repo, servers, onKill, onOpen, onBack }) {
 }
 
 export default function ReposView() {
-  const { data, loading, error } = useApi('/repos');
+  const { data, loading, error, refetch } = useApi('/repos');
+  const setupStatus = useApi('/setup/status');
   const servers = useApi('/dev-servers');
   const [selected, setSelected] = useState(null);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all'); // 'all' | 'configured' | 'vanilla'
+
+  const reposDir = setupStatus.data?.reposDir || '~/Documents/GitHub';
+
+  async function changeFolder() {
+    const result = await window.api.invoke('/api/repos-dir/change');
+    if (result.ok) {
+      setupStatus.refetch(true);
+      refetch();
+    }
+  }
 
   if (loading) return <div className="loading">Loading</div>;
   if (error) return <div className="loading">Failed to load repos</div>;
@@ -296,7 +307,23 @@ export default function ReposView() {
     <div>
       <div className="section-header">
         <h1>Repos</h1>
-        <p>No repos found in ~/Documents/GitHub</p>
+        <p>No repos found in this folder</p>
+      </div>
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 10,
+        padding: '12px 16px', marginBottom: 20,
+        background: 'var(--bg-card)', border: '1px solid var(--border)',
+        borderRadius: 'var(--radius-sm)',
+      }}>
+        <span style={{ fontSize: 12, color: 'var(--text-tertiary)', fontFamily: "'SF Mono','Fira Code',monospace", flex: 1 }}>
+          {reposDir}
+        </span>
+        <button onClick={changeFolder} className="btn-accent" style={{
+          padding: '5px 14px', fontSize: 12, fontWeight: 600,
+          borderRadius: 100, cursor: 'pointer',
+        }}>
+          Change folder
+        </button>
       </div>
     </div>
   );
@@ -348,7 +375,23 @@ export default function ReposView() {
     <div>
       <div className="section-header">
         <h1>Repos</h1>
-        <p>{data.length} repo{data.length !== 1 ? 's' : ''} in ~/Documents/GitHub, {configuredCount} with Claude configuration</p>
+        <p>{data.length} repo{data.length !== 1 ? 's' : ''}, {configuredCount} with Claude configuration</p>
+      </div>
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 10,
+        padding: '10px 16px', marginBottom: 16,
+        background: 'var(--bg-card)', border: '1px solid var(--border)',
+        borderRadius: 'var(--radius-sm)',
+      }}>
+        <span style={{ fontSize: 12, color: 'var(--text-tertiary)', fontFamily: "'SF Mono','Fira Code',monospace", flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {reposDir}
+        </span>
+        <button onClick={changeFolder} className="btn-accent" style={{
+          padding: '5px 14px', fontSize: 12, fontWeight: 600,
+          borderRadius: 100, cursor: 'pointer', flexShrink: 0,
+        }}>
+          Change folder
+        </button>
       </div>
       <div style={{ display: 'flex', gap: '12px', marginBottom: '20px', alignItems: 'center' }}>
         <div className="search-bar" style={{ marginBottom: 0, flex: 1 }}>

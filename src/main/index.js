@@ -4,7 +4,8 @@ import { execSync } from 'child_process'
 import os from 'os'
 import fs from 'fs'
 import matter from 'gray-matter'
-import { isMAS, hasRequiredFolders, runSetup, getBasePaths } from './sandbox.js'
+import { isMAS, hasRequiredFolders, runSetup, getBasePaths, pickFolder, saveBookmark } from './sandbox.js'
+import { DEMO, demoHandlers } from './demo-data.js'
 
 // Resolved after setup (or immediately for non-MAS)
 let CLAUDE_DIR
@@ -555,7 +556,20 @@ ipcMain.handle('/api/setup/status', () => ({
   needsSetup: isMAS && !hasRequiredFolders(),
   isMAS,
   paths: getBasePaths(),
+  reposDir: REPOS_DIR,
 }))
+
+// Change repos folder (available in all builds)
+ipcMain.handle('/api/repos-dir/change', async () => {
+  const win = BrowserWindow.getAllWindows()[0]
+  if (!win) return { ok: false }
+  const defaultPath = REPOS_DIR || join(os.homedir(), 'Documents', 'GitHub')
+  const result = await pickFolder(win, 'Select your repositories folder', 'Choose the folder containing your Git repositories', defaultPath)
+  if (!result) return { ok: false }
+  saveBookmark('reposDir', result.path, result.bookmark)
+  initPaths()
+  return { ok: true, path: REPOS_DIR }
+})
 
 ipcMain.handle('/api/setup/run', async () => {
   const win = BrowserWindow.getAllWindows()[0]
@@ -721,6 +735,27 @@ ipcMain.handle('/api/usage', () => {
   }
 })
 
+// Capture screenshot at exact dimensions (for App Store)
+ipcMain.handle('/api/screenshot', async () => {
+  const win = BrowserWindow.getAllWindows()[0]
+  if (!win) return { ok: false }
+  const image = await win.capturePage()
+  const png = image.toPNG()
+  const size = image.getSize()
+  const filename = `screenshot-${size.width}x${size.height}-${Date.now()}.png`
+  const outPath = join(app.getPath('desktop'), filename)
+  fs.writeFileSync(outPath, png)
+  return { ok: true, path: outPath, width: size.width, height: size.height }
+})
+
+// In demo mode, override IPC handlers with fake data
+if (DEMO) {
+  for (const [channel, handler] of Object.entries(demoHandlers)) {
+    try { ipcMain.removeHandler(channel) } catch {}
+    ipcMain.handle(channel, handler)
+  }
+}
+
 function createWindow() {
   initPaths()
 
@@ -729,6 +764,7 @@ function createWindow() {
     height: 800,
     minWidth: 800,
     minHeight: 500,
+    useContentSize: true,
     titleBarStyle: 'hiddenInset',
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),

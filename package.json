@@ -1,12 +1,13 @@
 {
   "name": "claude-code-dashboard",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A local desktop dashboard for your Claude Code configuration",
   "author": "Terrence Fradet",
   "main": "out/main/index.js",
   "private": true,
   "scripts": {
     "dev": "electron-vite dev",
+    "demo": "DEMO=1 electron-vite dev",
     "build": "electron-vite build",
     "package": "npm run build && electron-builder --mac --x64 --arm64",
     "package:dmg": "npm run build && electron-builder --mac dmg",

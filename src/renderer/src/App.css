@@ -14,8 +14,8 @@
   --bg: #f3f4f6;
   --bg-card: #ffffff;
   --text: #111827;
-  --text-secondary: #6b7280;
-  --text-tertiary: #9ca3af;
+  --text-secondary: #677080;
+  --text-tertiary: #6d7686;
   --border: #e5e7eb;
   --border-light: #f0f0f2;
 
@@ -549,7 +549,7 @@ body {
 }
 
 .status-allowed .status-badge {
-  color: #059669;
+  color: #047857;
   background: rgba(16,185,129,0.12);
 }
 
@@ -578,7 +578,7 @@ body {
   border: 1px solid rgba(245,158,11,0.3);
 }
 
-.status-warning .status-icon { color: #d97706; }
+.status-warning .status-icon { color: #b45309; }
 .status-warning .status-text { color: #92400e; }
 
 .accent-box {
@@ -592,22 +592,22 @@ body {
 }
 
 .tag-accent { background: rgba(45,210,169,0.1); color: var(--accent); }
-.tag-green  { background: rgba(16,185,129,0.1); color: #059669; }
+.tag-green  { background: rgba(16,185,129,0.1); color: #047857; }
 .tag-red    { background: rgba(239,68,68,0.1);  color: #dc2626; }
 .tag-gray   { background: var(--border-light);   color: var(--text-tertiary); }
 
 .insight-info    { background: rgba(45,210,169,0.07); border: 1px solid rgba(45,210,169,0.2); }
 .insight-info .insight-icon { color: var(--accent); }
 .insight-warning { background: rgba(245,158,11,0.07); border: 1px solid rgba(245,158,11,0.3); }
-.insight-warning .insight-icon { color: #d97706; }
+.insight-warning .insight-icon { color: #b45309; }
 .insight-tip     { background: rgba(16,185,129,0.07); border: 1px solid rgba(16,185,129,0.25); }
-.insight-tip .insight-icon { color: #059669; }
+.insight-tip .insight-icon { color: #047857; }
 
 .server-dot { background: #22c55e; }
-.server-port { color: #059669; }
+.server-port { color: #047857; }
 .server-port-badge {
   background: rgba(16,185,129,0.1);
-  color: #059669;
+  color: #047857;
   border: 1px solid rgba(16,185,129,0.2);
 }
 .server-port-badge .server-dot { background: #22c55e; }
@@ -620,7 +620,7 @@ body {
 
 .btn-copy.copied {
   background: rgba(16,185,129,0.12);
-  color: #059669;
+  color: #047857;
   border-color: rgba(16,185,129,0.3);
 }
 
@@ -632,7 +632,7 @@ body {
 
 .btn-accent.copied {
   background: rgba(16,185,129,0.12);
-  color: #059669;
+  color: #047857;
   border-color: rgba(16,185,129,0.3);
 }
 
@@ -652,7 +652,7 @@ body {
 }
 
 .error-text { color: #dc2626; }
-.warning-text { color: #d97706; }
+.warning-text { color: #b45309; }
 
 /* ── Dark mode ───────────────────────────────────────────────────────── */
 
@@ -662,7 +662,7 @@ body {
     --bg-card: #23242e;
     --text: #e4e5eb;
     --text-secondary: #9ca3af;
-    --text-tertiary: #6b7280;
+    --text-tertiary: #8890a0;
     --border: #32333d;
     --border-light: #2a2b35;
     --shadow: 0 1px 3px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.15);
