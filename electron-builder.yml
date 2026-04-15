@@ -10,7 +10,7 @@ files:
 mac:
   target:
     - target: dmg
-      arch: arm64
+      arch: universal
     - target: mas
       arch: arm64
   icon: build/icon.icns
