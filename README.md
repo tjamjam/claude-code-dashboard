@@ -4,8 +4,6 @@ A desktop app that gives you a visual command center for your entire [Claude Cod
 
 **[Download the latest DMG](https://github.com/tjamjam/claude-code-dashboard/releases/latest)** (macOS, Apple Silicon)
 
-Also available on the Mac App Store (search "Claude Code Dashboard").
-
 ![Claude Code Dashboard overview](docs/screenshot.png)
 
 ## What it does
@@ -21,13 +19,9 @@ Also available on the Mac App Store (search "Claude Code Dashboard").
 
 ## Install
 
-### Direct download (recommended)
+### Direct download
 
-Grab the `.dmg` from the [latest release](https://github.com/tjamjam/claude-code-dashboard/releases/latest), open it, and drag to Applications. The DMG is signed, notarized, and works on macOS 12+.
-
-### Mac App Store
-
-Search "Claude Code Dashboard" in the App Store. The MAS version runs in a sandbox, so some features (dev server monitoring, permission toggling) are view-only.
+Grab the `.dmg` from the [latest release](https://github.com/tjamjam/claude-code-dashboard/releases/latest), open it, and drag to Applications. The DMG is signed, notarized, and works on macOS 12+ (Intel and Apple Silicon).
 
 ### Build from source
 
