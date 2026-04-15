@@ -35,7 +35,7 @@ jobs:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: 22RP33YBSZ
-        run: npm run package:dmg
+        run: npx electron-vite build && npx electron-builder --mac dmg --publish never
 
       - name: Upload DMG artifact
         uses: actions/upload-artifact@v4
