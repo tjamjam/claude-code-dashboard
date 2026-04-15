@@ -6,6 +6,8 @@ A desktop app that gives you a visual command center for your entire [Claude Cod
 
 Also available on the Mac App Store (search "Claude Code Dashboard").
 
+![Claude Code Dashboard overview](docs/screenshot.png)
+
 ## What it does
 
 - **Overview dashboard** with global and per-repo stats, model detection, and self-improvement insights
