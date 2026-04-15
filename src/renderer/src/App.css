@@ -6,7 +6,7 @@
   --sidebar-active-text: #f0f0f5;
   --sidebar-active-bg: rgba(15, 163, 126, 0.15);
   --sidebar-hover-bg: rgba(255, 255, 255, 0.04);
-  --accent: #0b8060;
+  --accent: #065a45;
   --accent-light: #2DD2A9;
   --accent-secondary: #2D56D2;
   --accent-soft: #e0f7f1;
@@ -14,8 +14,8 @@
   --bg: #f3f4f6;
   --bg-card: #ffffff;
   --text: #111827;
-  --text-secondary: #677080;
-  --text-tertiary: #6d7686;
+  --text-secondary: #46505f;
+  --text-tertiary: #4a5363;
   --border: #e5e7eb;
   --border-light: #f0f0f2;
 
@@ -547,7 +547,7 @@ body {
 }
 
 .status-allowed .status-badge {
-  color: #047857;
+  color: #065f46;
   background: rgba(16,185,129,0.12);
 }
 
@@ -557,7 +557,7 @@ body {
 }
 
 .status-denied .status-badge {
-  color: #dc2626;
+  color: #991b1b;
   background: rgba(239,68,68,0.1);
 }
 
@@ -567,7 +567,7 @@ body {
 }
 
 .status-default .status-badge {
-  color: #9ca3af;
+  color: var(--text-tertiary);
   background: var(--border-light);
 }
 
@@ -576,7 +576,7 @@ body {
   border: 1px solid rgba(245,158,11,0.3);
 }
 
-.status-warning .status-icon { color: #b45309; }
+.status-warning .status-icon { color: #7c3a05; }
 .status-warning .status-text { color: #92400e; }
 
 .accent-box {
@@ -590,22 +590,22 @@ body {
 }
 
 .tag-accent { background: rgba(45,210,169,0.1); color: var(--accent); }
-.tag-green  { background: rgba(16,185,129,0.1); color: #047857; }
-.tag-red    { background: rgba(239,68,68,0.1);  color: #dc2626; }
+.tag-green  { background: rgba(16,185,129,0.1); color: #065f46; }
+.tag-red    { background: rgba(239,68,68,0.1);  color: #991b1b; }
 .tag-gray   { background: var(--border-light);   color: var(--text-tertiary); }
 
 .insight-info    { background: rgba(45,210,169,0.07); border: 1px solid rgba(45,210,169,0.2); }
 .insight-info .insight-icon { color: var(--accent); }
 .insight-warning { background: rgba(245,158,11,0.07); border: 1px solid rgba(245,158,11,0.3); }
-.insight-warning .insight-icon { color: #b45309; }
+.insight-warning .insight-icon { color: #7c3a05; }
 .insight-tip     { background: rgba(16,185,129,0.07); border: 1px solid rgba(16,185,129,0.25); }
-.insight-tip .insight-icon { color: #047857; }
+.insight-tip .insight-icon { color: #065f46; }
 
 .server-dot { background: #22c55e; }
-.server-port { color: #047857; }
+.server-port { color: #065f46; }
 .server-port-badge {
   background: rgba(16,185,129,0.1);
-  color: #047857;
+  color: #065f46;
   border: 1px solid rgba(16,185,129,0.2);
 }
 .server-port-badge .server-dot { background: #22c55e; }
@@ -618,7 +618,7 @@ body {
 
 .btn-copy.copied {
   background: rgba(16,185,129,0.12);
-  color: #047857;
+  color: #065f46;
   border-color: rgba(16,185,129,0.3);
 }
 
@@ -630,13 +630,13 @@ body {
 
 .btn-accent.copied {
   background: rgba(16,185,129,0.12);
-  color: #047857;
+  color: #065f46;
   border-color: rgba(16,185,129,0.3);
 }
 
 .btn-danger {
   background: rgba(239,68,68,0.08);
-  color: #dc2626;
+  color: #991b1b;
   border: 1px solid rgba(239,68,68,0.18);
 }
 
@@ -649,8 +649,8 @@ body {
   border: 1px solid rgba(45,210,169,0.15);
 }
 
-.error-text { color: #dc2626; }
-.warning-text { color: #b45309; }
+.error-text { color: #991b1b; }
+.warning-text { color: #7c3a05; }
 
 /* ── Dark mode ───────────────────────────────────────────────────────── */
 
@@ -659,8 +659,8 @@ body {
     --bg: #1a1b23;
     --bg-card: #23242e;
     --text: #e4e5eb;
-    --text-secondary: #9ca3af;
-    --text-tertiary: #8890a0;
+    --text-secondary: #bec4cf;
+    --text-tertiary: #acb3c0;
     --border: #32333d;
     --border-light: #2a2b35;
     --shadow: 0 1px 3px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.15);
@@ -682,7 +682,7 @@ body {
     border-color: rgba(239,68,68,0.3);
   }
   .status-denied .status-badge {
-    color: #f87171;
+    color: #fca5a5;
     background: rgba(239,68,68,0.15);
   }
 
@@ -704,7 +704,7 @@ body {
 
   .tag-accent { background: rgba(45,210,169,0.15); }
   .tag-green  { background: rgba(16,185,129,0.15); color: #34d399; }
-  .tag-red    { background: rgba(239,68,68,0.15);  color: #f87171; }
+  .tag-red    { background: rgba(239,68,68,0.15);  color: #fca5a5; }
 
   .insight-info    { background: rgba(45,210,169,0.1);  border-color: rgba(45,210,169,0.25); }
   .insight-warning { background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.4); }
@@ -738,7 +738,7 @@ body {
 
   .btn-danger {
     background: rgba(239,68,68,0.12);
-    color: #f87171;
+    color: #fca5a5;
     border-color: rgba(239,68,68,0.25);
   }
 
@@ -751,7 +751,7 @@ body {
     border-color: rgba(45,210,169,0.2);
   }
 
-  .error-text { color: #f87171; }
+  .error-text { color: #fca5a5; }
   .warning-text { color: #fbbf24; }
 
   .badge {
