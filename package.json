@@ -1,6 +1,6 @@
 {
   "name": "claude-code-dashboard",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A local desktop dashboard for your Claude Code configuration",
   "author": "Terrence Fradet",
   "main": "out/main/index.js",
