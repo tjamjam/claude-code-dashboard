@@ -84,7 +84,7 @@ export default function App() {
           <div className="about-modal" onClick={e => e.stopPropagation()}>
             <OctopusArt width={140} />
             <h2 className="about-name">Claude Code Dashboard</h2>
-            <p className="about-version">v1.0.1</p>
+            <p className="about-version">v{__APP_VERSION__}</p>
             <p className="about-desc">Configuration viewer for Claude Code</p>
             <p className="about-author">Built by Terrence Fradet</p>
             <button className="btn-back" onClick={() => setShowAbout(false)} style={{ marginTop: 20 }}>
