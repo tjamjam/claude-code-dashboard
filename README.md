@@ -1,6 +1,6 @@
 # Claude Code Dashboard
 
-A desktop app that gives you a visual command center for your entire [Claude Code](https://docs.anthropic.com/en/docs/claude-code) setup. It reads your `~/.claude/` directory and scans your repos, then shows everything in one place: skills, agents, commands, memory, permissions, MCP servers, plans, teams, and usage insights.
+A desktop app that gives you a visual command center for your entire [Claude Code](https://docs.anthropic.com/en/docs/claude-code) setup. It reads your `~/.claude/` directory and scans your repos, then shows everything in one place: skills, agents, commands, rules, memory, plans, tasks, teams, permissions, plugins, hooks, environment variables, context settings, launch profiles, MCP servers, and `/insights` reports.
 
 **Download for macOS:** [Download DMG](https://github.com/tjamjam/claude-code-dashboard/releases/latest/download/Claude-Code-Dashboard-universal.dmg)
 
@@ -8,13 +8,18 @@ A desktop app that gives you a visual command center for your entire [Claude Cod
 
 ## What it does
 
-- **Overview dashboard** with global and per-repo stats, model detection, and self-improvement insights
-- **Permission matrix** showing the status of all 15 built-in tools (Allowed, Denied, Prompts you)
-- **Repo scanner** that finds every repo in your GitHub directory, shows its Claude config, and detects running dev servers
-- **Browsers for skills, agents, commands, plans, memory, and teams**, both global and per-repo
+- **Overview dashboard** with global and per-repo stats, model detection, and a context snapshot (effort, thinking, autocompact)
+- **Insights** from your `/insights` reports: sessions, messages, commits, top tools, friction points, outcomes
+- **Browsers** for skills, agents, commands, rules, plans, memory, tasks, and teams, both global and per-repo
+- **Permissions** page with the full allow/deny matrix across global and repo settings, plus sandbox and dangerous-mode warnings
+- **Plugins** page showing installed plugins, enabled status, marketplaces, and blocklist
+- **Hooks** page grouping every configured hook by event type and source
+- **Env Vars** viewer with sensitive-value masking across global, global-local, and per-repo settings
+- **Context** page covering model, effort level, extended thinking, autocompact threshold, and caching toggles
+- **Launch Profiles** with copy-paste CLI flag combinations for common workflows
 - **MCP server viewer** with connection type, permission scope, and plugin details
+- **Repo scanner** that finds every repo in your GitHub directory, shows its Claude config, and detects running dev servers
 - **CLAUDE.md viewer** for your global instructions
-- **Usage insights** from `/insights` reports
 - **Copy-paste prompts** on every page, tailored to your current context, for creating, auditing, and improving your setup
 
 ## Install
