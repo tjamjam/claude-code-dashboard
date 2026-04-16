@@ -9,8 +9,8 @@
     "dev": "electron-vite dev",
     "demo": "DEMO=1 electron-vite dev",
     "build": "electron-vite build",
-    "package": "npm run build && electron-builder --mac --x64 --arm64",
-    "package:dmg": "npm run build && electron-builder --mac dmg --universal",
+    "package": "npm run build && dotenv -e .env -- electron-builder --mac --x64 --arm64",
+    "package:dmg": "npm run build && dotenv -e .env -- electron-builder --mac dmg --universal",
     "package:mas": "npm run build && electron-builder --mac mas"
   },
   "dependencies": {
@@ -21,6 +21,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.1",
+    "dotenv-cli": "^11.0.0",
     "electron": "^33.0.0",
     "electron-builder": "^25.0.0",
     "electron-vite": "^2.0.0"
