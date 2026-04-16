@@ -1,5 +1,13 @@
 import { useState } from 'react';
 import { useApi } from '../hooks/useApi';
+import PromptCard from './PromptCard';
+
+const TEAMS_PROMPT = `I want to set up Claude Code Agent Teams. Here's what I need:
+
+1. Enable the feature by adding CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 to the env key in ~/.claude/settings.json
+2. Check if tmux is installed (brew install tmux) for split-pane mode where each teammate gets its own terminal pane
+3. Create a team config in ~/.claude/teams/ with teammates suited for my workflow
+4. Explain how to start a team session and coordinate work through the shared task list`;
 
 export default function TeamsView() {
   const { data, loading, error } = useApi('/teams');
@@ -13,6 +21,19 @@ export default function TeamsView() {
         <h1>Teams</h1>
         <p>No teams configured</p>
       </div>
+      <div className="empty-state">
+        <div style={{ fontSize: 32, marginBottom: 12 }}>{'\u2687'}</div>
+        <div style={{ fontWeight: 600, marginBottom: 6 }}>No teams found</div>
+        <div style={{ fontSize: 13, maxWidth: 480, margin: '0 auto', lineHeight: 1.6 }}>
+          Agent Teams let multiple Claude instances work in parallel on the same codebase with shared task coordination.
+          Requires the <code>CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS</code> env var and optionally tmux for split-pane mode.
+        </div>
+      </div>
+      <PromptCard
+        title="Set up Agent Teams"
+        description="Copy this prompt into a Claude Code session to enable and configure teams."
+        prompt={TEAMS_PROMPT}
+      />
     </div>
   );
 
@@ -20,6 +41,7 @@ export default function TeamsView() {
     const config = selected.config || {};
     const members = config.members || {};
     return (
+      <>
       <div className="detail-view">
         <div className="detail-header">
           <button className="btn-back" onClick={() => setSelected(null)}>
@@ -53,6 +75,12 @@ export default function TeamsView() {
           <pre>{JSON.stringify(config, null, 2)}</pre>
         </div>
       </div>
+      <PromptCard
+        title="Manage your teams"
+        description="Ask Claude Code to review your team configuration and suggest improvements."
+        prompt={TEAMS_PROMPT}
+      />
+    </>
     );
   }
 
@@ -83,6 +111,11 @@ export default function TeamsView() {
           );
         })}
       </div>
+      <PromptCard
+        title="Manage your teams"
+        description="Ask Claude Code to review your team configuration and suggest improvements."
+        prompt={TEAMS_PROMPT}
+      />
     </div>
   );
 }

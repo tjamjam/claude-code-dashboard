@@ -1,7 +1,7 @@
 import { useApi } from '../hooks/useApi';
 import PromptCard from './PromptCard';
 
-const CLAUDE_MD_CREATE_PROMPT = `Generate a global ~/.claude/CLAUDE.md for me. First read any CLAUDE.md files in my ~/Documents/GitHub repos, check ~/.claude/settings.json for preferences, and run git log --oneline -10 in my most active repos to understand my coding patterns. Then write a CLAUDE.md that captures my working style, coding conventions, and preferences that should apply across every project — and save it to ~/.claude/CLAUDE.md.`;
+const CLAUDE_MD_CREATE_PROMPT = `Generate a global ~/.claude/CLAUDE.md for me. First read any CLAUDE.md files in my ~/Documents/GitHub repos, check ~/.claude/settings.json for preferences, and run git log --oneline -10 in my most active repos to understand my coding patterns. Then write a CLAUDE.md that captures my working style, coding conventions, and preferences that should apply across every project, and save it to ~/.claude/CLAUDE.md.`;
 
 const CLAUDE_MD_IMPROVE_PROMPT = `Analyze my ~/.claude/CLAUDE.md and suggest improvements. Read my recent git history across active repos and any project-level CLAUDE.md files to find: 1) Important patterns or conventions missing from the global file, 2) Outdated or irrelevant instructions to remove, 3) Anything that would make Claude more effective across all my projects. Then update ~/.claude/CLAUDE.md with your recommended changes.`;
 

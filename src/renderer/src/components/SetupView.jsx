@@ -40,11 +40,11 @@ export default function SetupView({ onComplete }) {
           fontSize: 12.5, color: 'var(--text-secondary)', lineHeight: 1.7,
         }}>
           <strong style={{ color: 'var(--text)' }}>1.</strong>{' '}
-          <code style={{ background: 'var(--border-light)', padding: '1px 5px', borderRadius: 3 }}>~/.claude</code>{' '}
+          <code style={{ background: 'var(--border-light)', padding: '1px 5px', borderRadius: 0 }}>~/.claude</code>{' '}
           your Claude Code config
           <br />
           <strong style={{ color: 'var(--text)' }}>2.</strong>{' '}
-          <code style={{ background: 'var(--border-light)', padding: '1px 5px', borderRadius: 3 }}>~/Documents/GitHub</code>{' '}
+          <code style={{ background: 'var(--border-light)', padding: '1px 5px', borderRadius: 0 }}>~/Documents/GitHub</code>{' '}
           your repositories
         </div>
 
@@ -54,7 +54,7 @@ export default function SetupView({ onComplete }) {
           style={{
             padding: '10px 28px', fontSize: 14, fontWeight: 600,
             background: 'var(--accent)', color: '#fff', border: 'none',
-            borderRadius: 100, cursor: running ? 'wait' : 'pointer',
+            borderRadius: 0, cursor: running ? 'wait' : 'pointer',
             opacity: running ? 0.7 : 1, transition: 'opacity 0.15s',
           }}
         >

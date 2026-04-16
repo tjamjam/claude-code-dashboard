@@ -3,7 +3,7 @@ import { useApi } from '../hooks/useApi';
 import PromptCard from './PromptCard';
 import RepoItemsSection, { SectionDivider } from './RepoItemsSection';
 
-const SKILLS_CREATE_PROMPT = `Look at my ~/.claude/ directory structure, any commands in ~/.claude/commands/, and CLAUDE.md files in my ~/Documents/GitHub repos. Based on patterns in how I use Claude Code across projects, recommend 3–5 skills I should create and write the full ~/.claude/skills/[name]/SKILL.md file for each one — include YAML frontmatter with name and description fields, and make the skill body an actionable step-by-step prompt.`;
+const SKILLS_CREATE_PROMPT = `Look at my ~/.claude/ directory structure, any commands in ~/.claude/commands/, and CLAUDE.md files in my ~/Documents/GitHub repos. Based on patterns in how I use Claude Code across projects, recommend 3–5 skills I should create and write the full ~/.claude/skills/[name]/SKILL.md file for each one. Include YAML frontmatter with name and description fields, and make the skill body an actionable step-by-step prompt.`;
 
 const SKILLS_AUDIT_PROMPT = `Audit all my skills across ~/.claude/skills/ and my repo .claude/skills/ directories. For each skill: identify if it's outdated, overlaps with another, or could be made more powerful. Suggest concrete improvements and create any missing skills that would fill obvious gaps in my workflow.`;
 

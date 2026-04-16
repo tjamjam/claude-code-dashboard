@@ -33,7 +33,7 @@ export default function PromptCard({ title, description, prompt }) {
             padding: '7px 16px',
             fontSize: 12,
             fontWeight: 600,
-            borderRadius: 100,
+            borderRadius: 0,
             cursor: 'pointer',
             transition: 'all 0.15s',
             flexShrink: 0,

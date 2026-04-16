@@ -6,7 +6,7 @@ import RepoItemsSection, { SectionDivider } from './RepoItemsSection';
 const COMMANDS_AUDIT_PROMPT = `Audit all commands in ~/.claude/commands/ and my repo .claude/commands/ directories. For each command: determine if it should be promoted to a proper skill (with SKILL.md structure), if it overlaps with an existing skill, or if it can be improved. Produce the SKILL.md for any that should be promoted.`;
 
 function commandDetailPrompt(cmd) {
-  return `Review this command "/${cmd.name}":\n\n${cmd.content || '(no content)'}\n\nAnalyze it and suggest:\n1. Whether it should be promoted to a skill — if yes, write the full SKILL.md for ~/.claude/skills/${cmd.name}/SKILL.md\n2. Whether it overlaps with any existing skills or agents and should be consolidated\n3. How to improve the prompt itself for more consistent output`;
+  return `Review this command "/${cmd.name}":\n\n${cmd.content || '(no content)'}\n\nAnalyze it and suggest:\n1. Whether it should be promoted to a skill. If yes, write the full SKILL.md for ~/.claude/skills/${cmd.name}/SKILL.md\n2. Whether it overlaps with any existing skills or agents and should be consolidated\n3. How to improve the prompt itself for more consistent output`;
 }
 
 function CommandCard({ cmd, onClick }) {
@@ -102,7 +102,7 @@ export default function CommandsView() {
             marginBottom: 20,
             lineHeight: 1.6,
           }}>
-            <strong style={{ color: 'var(--text)' }}>Commands vs Skills — </strong>
+            <strong style={{ color: 'var(--text)' }}>Commands vs Skills: </strong>
             Commands are simple prompt templates stored in <code>.claude/commands/</code> and invoked with <code>/name</code>.
             Skills (in <code>.claude/skills/</code>) are structured workflows with metadata, versioning, and references.
             Both use <code>/name</code> to invoke, but skills are more powerful.

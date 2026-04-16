@@ -3,7 +3,7 @@ import { useApi } from '../hooks/useApi';
 import PromptCard from './PromptCard';
 import RepoItemsSection, { SectionDivider } from './RepoItemsSection';
 
-const AGENTS_CREATE_PROMPT = `Review my project CLAUDE.md files across ~/Documents/GitHub and my ~/.claude/settings.json. Based on workflows I do frequently, suggest 2–3 specialized sub-agents I should define in ~/.claude/agents/ and write the full .md file for each — include YAML frontmatter with name, description, model, and tools fields, and a system prompt body that gives the agent a specific role and capabilities.`;
+const AGENTS_CREATE_PROMPT = `Review my project CLAUDE.md files across ~/Documents/GitHub and my ~/.claude/settings.json. Based on workflows I do frequently, suggest 2–3 specialized sub-agents I should define in ~/.claude/agents/ and write the full .md file for each. Include YAML frontmatter with name, description, model, and tools fields, and a system prompt body that gives the agent a specific role and capabilities.`;
 
 const AGENTS_AUDIT_PROMPT = `Audit all my agents across ~/.claude/agents/ and my repo .claude/agents/ directories. For each agent: check if the tools list is optimal, if the role is clearly defined, and if there are obvious gaps. Suggest improvements and create any missing agents for workflows I do frequently.`;
 

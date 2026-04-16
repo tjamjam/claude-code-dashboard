@@ -52,7 +52,7 @@ export default function RepoItemsSection({ repos, getItems, renderCard, search }
             <span style={{
               fontSize: 11, color: 'var(--text-tertiary)',
               background: 'var(--border-light)',
-              padding: '1px 7px', borderRadius: 100,
+              padding: '1px 7px', borderRadius: 0,
             }}>
               {items.length} {items.length === 1 ? 'item' : 'items'}
             </span>

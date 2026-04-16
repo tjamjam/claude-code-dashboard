@@ -1,5 +1,6 @@
 import { useApi } from '../hooks/useApi';
 import PromptCard from './PromptCard';
+import { SectionDivider } from './RepoItemsSection';
 
 const MCP_PROMPT = `Review my installed MCP servers and their configurations. Check which ones are actively connected, whether their permissions are correctly scoped, and if there are useful MCP servers I'm missing. Suggest any configuration improvements.`;
 
@@ -33,14 +34,14 @@ function ServerCard({ serverKey, info, status }) {
           <span style={{
             fontSize: 11, color: 'var(--text-tertiary)',
             background: 'var(--border-light)',
-            padding: '2px 8px', borderRadius: 100,
+            padding: '2px 8px', borderRadius: 0,
           }}>
             {info.registry}
           </span>
         </div>
         <span className="status-badge" style={{
           fontSize: 11, fontWeight: 600,
-          padding: '3px 10px', borderRadius: 100,
+          padding: '3px 10px', borderRadius: 0,
         }}>
           {STATUS_LABELS[status]}
         </span>
@@ -53,7 +54,7 @@ function ServerCard({ serverKey, info, status }) {
             fontSize: 11.5,
             color: isRemote ? undefined : 'var(--text-secondary)',
             background: isRemote ? undefined : 'var(--border-light)',
-            padding: '2px 8px', borderRadius: 4,
+            padding: '2px 8px', borderRadius: 0,
           }}>
             {connectionType}
           </span>
@@ -107,11 +108,46 @@ function ServerCard({ serverKey, info, status }) {
   );
 }
 
+function RepoMcpCard({ repoName, serverKey, config }) {
+  const isRemote = config.type === 'http' || config.url;
+  const connectionType = isRemote ? 'HTTP' : 'Local';
+
+  return (
+    <div className="status-default" style={{
+      borderRadius: 'var(--radius)', padding: '16px 20px',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+        <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{serverKey}</span>
+        <span style={{ fontSize: 11, color: 'var(--text-tertiary)', background: 'var(--border-light)', padding: '2px 8px', borderRadius: 0 }}>.mcp.json</span>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)', width: 80 }}>Type</span>
+          <span style={{ fontSize: 11.5, color: 'var(--text-secondary)', background: 'var(--border-light)', padding: '2px 8px', borderRadius: 0 }}>{connectionType}</span>
+        </div>
+        {isRemote && config.url && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)', width: 80 }}>URL</span>
+            <span style={{ fontSize: 11.5, color: 'var(--text-secondary)' }}>{config.url}</span>
+          </div>
+        )}
+        {!isRemote && config.command && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)', width: 80 }}>Command</span>
+            <span style={{ fontSize: 11.5, color: 'var(--text-secondary)' }}>{config.command} {(config.args || []).join(' ')}</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function McpView() {
   const perms = useApi('/permissions');
   const settings = useApi('/settings');
+  const repos = useApi('/repos');
 
-  const loading = perms.loading || settings.loading;
+  const loading = perms.loading || settings.loading || repos.loading;
   if (loading) return <div className="loading">Loading</div>;
   if (perms.error || settings.error) return <div className="loading">Failed to load MCP servers</div>;
 
@@ -129,33 +165,67 @@ export default function McpView() {
     ...(localSettings?.permissions?.deny || []),
   ];
 
+  // Collect repo-level .mcp.json servers
+  const repoMcp = (repos.data || [])
+    .filter(r => r.mcpJson)
+    .map(r => ({
+      name: r.name,
+      servers: Object.entries(r.mcpJson.mcpServers || r.mcpJson || {})
+        .filter(([, v]) => typeof v === 'object')
+    }))
+    .filter(r => r.servers.length > 0);
+
+  const totalServers = entries.length + repoMcp.reduce((n, r) => n + r.servers.length, 0);
+
   return (
     <div>
       <div className="section-header">
         <h1>MCP Servers</h1>
-        <p>{entries.length} server{entries.length !== 1 ? 's' : ''} installed</p>
+        <p>{totalServers} server{totalServers !== 1 ? 's' : ''} total</p>
       </div>
 
       {entries.length > 0 ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {entries.map(([key, info]) => (
-            <ServerCard
-              key={key}
-              serverKey={key}
-              info={info}
-              status={getServerPermission(key, allow, deny)}
-            />
-          ))}
-        </div>
-      ) : (
+        <>
+          {repoMcp.length > 0 && <SectionDivider label="From Plugins" />}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {entries.map(([key, info]) => (
+              <ServerCard
+                key={key}
+                serverKey={key}
+                info={info}
+                status={getServerPermission(key, allow, deny)}
+              />
+            ))}
+          </div>
+        </>
+      ) : !repoMcp.length ? (
         <div className="empty-state">
           <div style={{ fontSize: 32, marginBottom: 12 }}>&#x1F50C;</div>
           <div style={{ fontWeight: 600, marginBottom: 6 }}>No MCP servers installed</div>
           <div style={{ fontSize: 13, maxWidth: 420, margin: '0 auto', lineHeight: 1.6 }}>
-            MCP servers extend Claude Code with external tools — Playwright for browser automation,
+            MCP servers extend Claude Code with external tools: Playwright for browser automation,
             Slack for messaging, databases, and more. Install plugins with <code>/install-plugin</code>.
           </div>
         </div>
+      ) : null}
+
+      {repoMcp.length > 0 && (
+        <>
+          <SectionDivider label="In Repos (.mcp.json)" />
+          {repoMcp.map(repo => (
+            <div key={repo.name} style={{ marginBottom: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{repo.name}</span>
+                <span style={{ fontSize: 11, color: 'var(--text-tertiary)', background: 'var(--border-light)', padding: '1px 7px' }}>{repo.servers.length} server{repo.servers.length !== 1 ? 's' : ''}</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {repo.servers.map(([key, config]) => (
+                  <RepoMcpCard key={`${repo.name}-${key}`} repoName={repo.name} serverKey={key} config={config} />
+                ))}
+              </div>
+            </div>
+          ))}
+        </>
       )}
 
       <PromptCard

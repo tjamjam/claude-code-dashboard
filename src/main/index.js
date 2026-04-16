@@ -417,6 +417,7 @@ ipcMain.handle('/api/repos', () => {
     }))
 
     const hooks = settings?.hooks || settingsLocal?.hooks || null
+    const mcpJson = safeJSON(join(repoPath, '.mcp.json'))
 
     const encodedPath = repoPath.replace(/\//g, '-')
     const memDir = join(CLAUDE_DIR, 'projects', encodedPath, 'memory')
@@ -432,6 +433,7 @@ ipcMain.handle('/api/repos', () => {
     if (agents.length) configItems.push(`${agents.length} agent${agents.length !== 1 ? 's' : ''}`)
     if (rules.length) configItems.push(`${rules.length} rule${rules.length !== 1 ? 's' : ''}`)
     if (hooks) configItems.push('hooks')
+    if (mcpJson) configItems.push('.mcp.json')
     if (memoryCount) configItems.push(`${memoryCount} memor${memoryCount !== 1 ? 'ies' : 'y'}`)
 
     return {
@@ -446,6 +448,7 @@ ipcMain.handle('/api/repos', () => {
       agents,
       rules,
       hooks,
+      mcpJson: mcpJson || null,
       memoryCount,
       configItems,
       hasConfig: configItems.length > 0
@@ -732,6 +735,239 @@ ipcMain.handle('/api/usage', () => {
     topProjects,
     outcomes,
     frictionCats,
+  }
+})
+
+// Rules
+ipcMain.handle('/api/rules', () => {
+  const globalRulesDir = join(CLAUDE_DIR, 'rules')
+  const globalRules = files(globalRulesDir, '.md').map(f => ({
+    id: f.replace('.md', ''),
+    name: f.replace('.md', ''),
+    content: safeRead(join(globalRulesDir, f)) || ''
+  }))
+
+  const repoPaths = scanGithubRepos()
+  const repos = repoPaths.map(rp => {
+    const rulesDir = join(rp, '.claude', 'rules')
+    const ruleFiles = files(rulesDir, '.md')
+    if (!ruleFiles.length) return null
+    return {
+      name: rp.replace(REPOS_DIR + '/', ''),
+      path: rp,
+      rules: ruleFiles.map(f => ({
+        id: f.replace('.md', ''),
+        name: f.replace('.md', ''),
+        content: safeRead(join(rulesDir, f)) || ''
+      }))
+    }
+  }).filter(Boolean)
+
+  return {
+    global: globalRules,
+    repos,
+    totalCount: globalRules.length + repos.reduce((n, r) => n + r.rules.length, 0)
+  }
+})
+
+// Hooks
+ipcMain.handle('/api/hooks', () => {
+  function extractHooks(settingsPath, label, source, repoName) {
+    const s = safeJSON(settingsPath)
+    const hooks = s?.hooks
+    if (!hooks || !Object.keys(hooks).length) return null
+    return { label, source, repoName, hooks }
+  }
+
+  const sources = [
+    extractHooks(join(CLAUDE_DIR, 'settings.json'), 'Global (settings.json)', 'global', null),
+    extractHooks(join(CLAUDE_DIR, 'settings.local.json'), 'Global (settings.local.json)', 'global-local', null),
+  ].filter(Boolean)
+
+  for (const rp of scanGithubRepos()) {
+    const name = rp.replace(REPOS_DIR + '/', '')
+    const s1 = extractHooks(join(rp, '.claude', 'settings.json'), `${name} (settings.json)`, 'repo', name)
+    const s2 = extractHooks(join(rp, '.claude', 'settings.local.json'), `${name} (settings.local.json)`, 'repo-local', name)
+    if (s1) sources.push(s1)
+    if (s2) sources.push(s2)
+  }
+
+  const allEvents = [...new Set(sources.flatMap(s => Object.keys(s.hooks)))].sort()
+  let totalHooks = 0
+  for (const s of sources) {
+    for (const arr of Object.values(s.hooks)) {
+      if (Array.isArray(arr)) totalHooks += arr.length
+    }
+  }
+
+  return { sources, allEvents, totalHooks }
+})
+
+// Permissions (full hierarchy)
+ipcMain.handle('/api/permissions-full', () => {
+  function extractLayer(settingsPath, label, source, repoName) {
+    const s = safeJSON(settingsPath)
+    if (!s) return null
+    const perms = s.permissions || null
+    const sandbox = s.sandbox || null
+    const skip = s.skipDangerousModePermissionPrompt || false
+    if (!perms && !sandbox && !skip) return null
+    return { label, source, repoName, permissions: perms, sandbox, skipDangerousMode: skip }
+  }
+
+  const layers = [
+    extractLayer(join(CLAUDE_DIR, 'settings.json'), '~/.claude/settings.json', 'global', null),
+    extractLayer(join(CLAUDE_DIR, 'settings.local.json'), '~/.claude/settings.local.json', 'global-local', null),
+  ].filter(Boolean)
+
+  for (const rp of scanGithubRepos()) {
+    const name = rp.replace(REPOS_DIR + '/', '')
+    const l1 = extractLayer(join(rp, '.claude', 'settings.json'), `${name}/.claude/settings.json`, 'repo', name)
+    const l2 = extractLayer(join(rp, '.claude', 'settings.local.json'), `${name}/.claude/settings.local.json`, 'repo-local', name)
+    if (l1) layers.push(l1)
+    if (l2) layers.push(l2)
+  }
+
+  const effectiveAllow = layers.flatMap(l => l.permissions?.allow || [])
+  const effectiveDeny = layers.flatMap(l => l.permissions?.deny || [])
+  const hasSandbox = layers.some(l => l.sandbox)
+  const hasSkipDangerous = layers.some(l => l.skipDangerousMode)
+
+  return { layers, effectiveAllow, effectiveDeny, hasSandbox, hasSkipDangerous }
+})
+
+// Environment variables
+ipcMain.handle('/api/env-vars', () => {
+  const globalSettings = safeJSON(join(CLAUDE_DIR, 'settings.json'))
+  const globalLocal = safeJSON(join(CLAUDE_DIR, 'settings.local.json'))
+
+  const repos = []
+  for (const rp of scanGithubRepos()) {
+    const s = safeJSON(join(rp, '.claude', 'settings.json'))
+    const sl = safeJSON(join(rp, '.claude', 'settings.local.json'))
+    const env = s?.env || null
+    const envLocal = sl?.env || null
+    if (env || envLocal) {
+      repos.push({
+        name: rp.replace(REPOS_DIR + '/', ''),
+        path: rp,
+        env,
+        envLocal
+      })
+    }
+  }
+
+  const allVars = [
+    ...Object.keys(globalSettings?.env || {}),
+    ...Object.keys(globalLocal?.env || {}),
+    ...repos.flatMap(r => [...Object.keys(r.env || {}), ...Object.keys(r.envLocal || {})])
+  ]
+
+  return {
+    global: globalSettings?.env || null,
+    globalLocal: globalLocal?.env || null,
+    repos,
+    totalVars: new Set(allVars).size
+  }
+})
+
+// Tasks
+ipcMain.handle('/api/tasks', () => {
+  const tasksDir = join(CLAUDE_DIR, 'tasks')
+  const groups = []
+  const statusCounts = { completed: 0, in_progress: 0, pending: 0 }
+  let totalSubtasks = 0
+
+  for (const dir of dirs(tasksDir)) {
+    const taskDir = join(tasksDir, dir)
+    const subtasks = []
+    for (const f of files(taskDir, '.json')) {
+      const data = safeJSON(join(taskDir, f))
+      if (!data || !data.subject) continue
+      subtasks.push({
+        id: data.id || f.replace('.json', ''),
+        subject: data.subject || '',
+        description: data.description || '',
+        status: data.status || 'pending',
+        blocks: data.blocks || [],
+        blockedBy: data.blockedBy || []
+      })
+      const st = data.status || 'pending'
+      if (statusCounts[st] !== undefined) statusCounts[st]++
+      totalSubtasks++
+    }
+    if (subtasks.length > 0) {
+      groups.push({ id: dir, subtasks })
+    }
+  }
+
+  return { groups, totalSubtasks, statusCounts }
+})
+
+// Plugins (full)
+ipcMain.handle('/api/plugins-full', () => {
+  const pluginsDir = join(CLAUDE_DIR, 'plugins')
+  const installed = safeJSON(join(pluginsDir, 'installed_plugins.json'))
+  const blocklist = safeJSON(join(pluginsDir, 'blocklist.json'))
+  const marketplaces = safeJSON(join(pluginsDir, 'known_marketplaces.json'))
+  const settings = safeJSON(join(CLAUDE_DIR, 'settings.json'))
+
+  const pluginEntries = installed?.plugins || {}
+  const totalInstalled = Object.keys(pluginEntries).length
+
+  return {
+    installed: pluginEntries,
+    enabled: settings?.enabledPlugins || {},
+    blocklist: blocklist || { plugins: [] },
+    marketplaces: marketplaces || {},
+    extraMarketplaces: settings?.extraKnownMarketplaces || {},
+    totalInstalled,
+    totalMarketplaces: Object.keys(marketplaces || {}).length + Object.keys(settings?.extraKnownMarketplaces || {}).length
+  }
+})
+
+// Context management
+ipcMain.handle('/api/context', () => {
+  const settings = safeJSON(join(CLAUDE_DIR, 'settings.json'))
+  const local = safeJSON(join(CLAUDE_DIR, 'settings.local.json'))
+  const merged = { ...settings, ...local }
+  const env = { ...(settings?.env || {}), ...(local?.env || {}) }
+
+  return {
+    model: merged.model || null,
+    effortLevel: merged.effortLevel || null,
+    thinkingEnabled: merged.alwaysThinkingEnabled ?? null,
+    env: {
+      CLAUDE_AUTOCOMPACT_PCT_OVERRIDE: env.CLAUDE_AUTOCOMPACT_PCT_OVERRIDE || null,
+      MAX_THINKING_TOKENS: env.MAX_THINKING_TOKENS || null,
+      CLAUDE_CODE_MAX_CONTEXT_TOKENS: env.CLAUDE_CODE_MAX_CONTEXT_TOKENS || null,
+      DISABLE_COMPACT: env.DISABLE_COMPACT || null,
+      DISABLE_PROMPT_CACHING: env.DISABLE_PROMPT_CACHING || null,
+    }
+  }
+})
+
+// Launch profiles
+ipcMain.handle('/api/launch-profiles', () => {
+  const settings = safeJSON(join(CLAUDE_DIR, 'settings.json'))
+
+  return {
+    currentModel: settings?.model || null,
+    currentPermissions: settings?.permissions || null,
+    profiles: [
+      { id: 'default', name: 'Default', category: 'Interactive', description: 'Standard interactive mode', command: 'claude' },
+      { id: 'plan', name: 'Plan Mode', category: 'Interactive', description: 'Read-only exploration and planning', command: 'claude --permission-mode plan' },
+      { id: 'accept-edits', name: 'Accept Edits', category: 'Interactive', description: 'Auto-accept file edits, still prompt for Bash', command: 'claude --permission-mode acceptEdits' },
+      { id: 'headless', name: 'Headless', category: 'Automation', description: 'Non-interactive for scripts and CI', command: 'claude -p "your prompt" --output-format json' },
+      { id: 'verbose', name: 'Verbose', category: 'Automation', description: 'Full turn-by-turn logging output', command: 'claude --verbose' },
+      { id: 'opus', name: 'Opus', category: 'Model', description: 'Use Opus for complex reasoning tasks', command: 'claude --model opus' },
+      { id: 'sonnet', name: 'Sonnet', category: 'Model', description: 'Use Sonnet for faster, cheaper execution', command: 'claude --model sonnet' },
+      { id: 'haiku', name: 'Haiku', category: 'Model', description: 'Use Haiku for quick, simple tasks', command: 'claude --model haiku' },
+      { id: 'worktree', name: 'Worktree', category: 'Specialized', description: 'Isolated git worktree for parallel work', command: 'claude --worktree' },
+      { id: 'resume', name: 'Resume', category: 'Session', description: 'Continue the most recent conversation', command: 'claude --continue' },
+      { id: 'budget', name: 'Budget Cap', category: 'Specialized', description: 'Set a maximum spend limit for a session', command: 'claude --max-budget-usd 5.00' },
+      { id: 'max-turns', name: 'Turn Limit', category: 'Specialized', description: 'Limit the number of agentic turns', command: 'claude --max-turns 20' },
+    ]
   }
 })
 

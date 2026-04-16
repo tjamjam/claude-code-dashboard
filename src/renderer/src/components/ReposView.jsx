@@ -3,7 +3,7 @@ import { useApi } from '../hooks/useApi';
 import PromptCard from './PromptCard';
 
 function repoSetupPrompt(repo) {
-  return `I'm in the ${repo.name} repo at ${repo.path}. Analyze the codebase — look at the languages used, project structure, package.json/Cargo.toml/etc., and recent git history. Then set up Claude Code for this project: create a CLAUDE.md with project-specific conventions and context, and if the project would benefit from custom skills or commands, create those too in .claude/skills/ or .claude/commands/.`;
+  return `I'm in the ${repo.name} repo at ${repo.path}. Analyze the codebase. Look at the languages used, project structure, package.json/Cargo.toml/etc., and recent git history. Then set up Claude Code for this project: create a CLAUDE.md with project-specific conventions and context, and if the project would benefit from custom skills or commands, create those too in .claude/skills/ or .claude/commands/.`;
 }
 
 function repoAuditPrompt(repo) {
@@ -26,7 +26,7 @@ function CopyButton({ text, label }) {
         padding: '5px 12px',
         fontSize: 11.5,
         fontWeight: 600,
-        borderRadius: 100,
+        borderRadius: 0,
         cursor: 'pointer',
         transition: 'all 0.15s',
         whiteSpace: 'nowrap',
@@ -62,7 +62,7 @@ function ServerBadge({ server, onKill, onOpen }) {
         onClick={e => { e.stopPropagation(); onKill(server.pid); }}
         style={{
           marginLeft: 'auto', padding: '2px 8px', fontSize: 11, fontWeight: 600,
-          borderRadius: 100, cursor: 'pointer',
+          borderRadius: 0, cursor: 'pointer',
           transition: 'background 0.12s',
         }}
       >
@@ -319,7 +319,7 @@ export default function ReposView() {
         </span>
         <button onClick={changeFolder} className="btn-accent" style={{
           padding: '5px 14px', fontSize: 12, fontWeight: 600,
-          borderRadius: 100, cursor: 'pointer',
+          borderRadius: 0, cursor: 'pointer',
         }}>
           Change folder
         </button>
@@ -387,7 +387,7 @@ export default function ReposView() {
         </span>
         <button onClick={changeFolder} className="btn-accent" style={{
           padding: '5px 14px', fontSize: 12, fontWeight: 600,
-          borderRadius: 100, cursor: 'pointer', flexShrink: 0,
+          borderRadius: 0, cursor: 'pointer', flexShrink: 0,
         }}>
           Change folder
         </button>
@@ -446,7 +446,7 @@ export default function ReposView() {
                         className="server-port-badge"
                         style={{
                           display: 'flex', alignItems: 'center', gap: 4,
-                          padding: '2px 8px', borderRadius: 100, fontSize: 11, fontWeight: 600,
+                          padding: '2px 8px', borderRadius: 0, fontSize: 11, fontWeight: 600,
                           textDecoration: 'none',
                         }}
                       >

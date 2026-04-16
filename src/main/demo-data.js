@@ -133,7 +133,7 @@ demoHandlers['/api/permissions'] = () => ({
 })
 
 demoHandlers['/api/repos'] = () => [
-  { name: 'webapp', path: '/Users/demo/Documents/GitHub/webapp', hasDotClaude: true, claudeMd: '# Webapp\nNext.js App Router + Supabase.', settings: { model: 'claude-opus-4-6' }, settingsLocal: null, skills: [{ id: 'deploy', name: 'Deploy', description: 'Deploy to Vercel', frontmatter: {}, content: '' }], commands: [{ id: 'commit', name: 'commit', content: 'Review staged changes...' }], agents: [{ id: 'reviewer', name: 'Code Reviewer', frontmatter: { model: 'claude-sonnet-4-6' }, content: '' }], rules: [], hooks: { PreToolUse: [{ matcher: 'Bash', command: 'echo "ok"' }] }, memoryCount: 3, configItems: ['CLAUDE.md', '.claude/', 'settings', '1 skill', '1 command', '1 agent', '3 memories', 'hooks'], hasConfig: true },
+  { name: 'webapp', path: '/Users/demo/Documents/GitHub/webapp', hasDotClaude: true, claudeMd: '# Webapp\nNext.js App Router + Supabase.', settings: { model: 'claude-opus-4-6' }, settingsLocal: null, skills: [{ id: 'deploy', name: 'Deploy', description: 'Deploy to Vercel', frontmatter: {}, content: '' }], commands: [{ id: 'commit', name: 'commit', content: 'Review staged changes...' }], agents: [{ id: 'reviewer', name: 'Code Reviewer', frontmatter: { model: 'claude-sonnet-4-6' }, content: '' }], rules: [], hooks: { PreToolUse: [{ matcher: 'Bash', command: 'echo "ok"' }] }, mcpJson: { mcpServers: { context7: { command: 'npx', args: ['-y', '@upstash/context7-mcp'] }, playwright: { command: 'npx', args: ['@anthropic/playwright-mcp'] } } }, memoryCount: 3, configItems: ['CLAUDE.md', '.claude/', 'settings', '1 skill', '1 command', '1 agent', '3 memories', 'hooks', '.mcp.json'], hasConfig: true },
   { name: 'mobile-app', path: '/Users/demo/Documents/GitHub/mobile-app', hasDotClaude: true, claudeMd: '# Mobile App\nReact Native + Expo.', settings: null, settingsLocal: null, skills: [{ id: 'build', name: 'EAS Build', description: 'Run EAS build', frontmatter: {}, content: '' }, { id: 'test-e2e', name: 'E2E Tests', description: 'Run Detox E2E tests', frontmatter: {}, content: '' }], commands: [{ id: 'deploy', name: 'deploy', content: 'Run eas build...' }], agents: [], rules: [{ id: 'no-inline', name: 'no-inline-styles', content: 'Never use inline styles.' }], hooks: null, memoryCount: 1, configItems: ['CLAUDE.md', '.claude/', '2 skills', '1 command', '1 rule', '1 memory'], hasConfig: true },
   { name: 'api-gateway', path: '/Users/demo/Documents/GitHub/api-gateway', hasDotClaude: true, claudeMd: '# API Gateway\nExpress + TypeScript.', settings: null, settingsLocal: null, skills: [], commands: [{ id: 'migrate', name: 'migrate', content: 'Run migrations...' }], agents: [], rules: [], hooks: null, memoryCount: 2, configItems: ['CLAUDE.md', '.claude/', '1 command', '2 memories'], hasConfig: true },
   { name: 'design-system', path: '/Users/demo/Documents/GitHub/design-system', hasDotClaude: true, claudeMd: null, settings: null, settingsLocal: null, skills: [], commands: [], agents: [], rules: [], hooks: null, memoryCount: 0, configItems: ['.claude/'], hasConfig: true },
@@ -180,6 +180,174 @@ demoHandlers['/api/usage'] = () => ({
   ],
   outcomes: { success: 142, partial: 31, abandoned: 16 },
   frictionCats: { 'permission-denied': 24, 'context-limit': 18, 'tool-error': 12, 'unclear-instructions': 8 },
+})
+
+// Rules
+demoHandlers['/api/rules'] = () => ({
+  global: [
+    { id: 'no-any', name: 'no-any', content: 'Never use `any` type in TypeScript. Always provide explicit types or use `unknown` with proper type narrowing.' },
+    { id: 'error-handling', name: 'error-handling', content: 'Always handle errors explicitly. Never use empty catch blocks. Log errors with context.' },
+  ],
+  repos: [
+    {
+      name: 'webapp',
+      path: '/Users/demo/Documents/GitHub/webapp',
+      rules: [
+        { id: 'server-components', name: 'server-components', content: 'Default to server components. Only add "use client" when the component needs interactivity, browser APIs, or React hooks.' },
+        { id: 'api-routes', name: 'api-routes', content: 'All API routes must validate input with zod schemas. Return proper HTTP status codes.' },
+      ]
+    },
+    {
+      name: 'mobile-app',
+      path: '/Users/demo/Documents/GitHub/mobile-app',
+      rules: [
+        { id: 'no-inline-styles', name: 'no-inline-styles', content: 'Never use inline styles. Always use StyleSheet.create() for performance.' },
+      ]
+    }
+  ],
+  totalCount: 5,
+})
+
+// Hooks
+demoHandlers['/api/hooks'] = () => ({
+  sources: [
+    {
+      label: 'Global (settings.json)',
+      source: 'global',
+      repoName: null,
+      hooks: {
+        PreToolUse: [{ hooks: [{ type: 'command', command: 'python3 ~/.claude/hooks/pre-tool-check.py', timeout: 5000, async: false }], matcher: { tool_name: 'Bash' } }],
+        PostToolUse: [{ hooks: [{ type: 'command', command: 'prettier --write "$FILE" 2>/dev/null || true', timeout: 3000, async: true, statusMessage: 'Formatting...' }] }],
+        Notification: [{ hooks: [{ type: 'command', command: 'terminal-notifier -message "$CLAUDE_NOTIFICATION" -title "Claude Code"', timeout: 2000, async: true }] }],
+        Stop: [{ hooks: [{ type: 'command', command: 'echo "Session ended at $(date)" >> ~/.claude/session.log', timeout: 1000, async: true }] }],
+      }
+    },
+    {
+      label: 'webapp (settings.local.json)',
+      source: 'repo-local',
+      repoName: 'webapp',
+      hooks: {
+        PreToolUse: [{ hooks: [{ type: 'command', command: 'npx tsc --noEmit 2>&1 | head -5', timeout: 10000 }], matcher: { tool_name: 'Write' } }],
+      }
+    }
+  ],
+  allEvents: ['Notification', 'PostToolUse', 'PreToolUse', 'Stop'],
+  totalHooks: 5,
+})
+
+// Permissions (full)
+demoHandlers['/api/permissions-full'] = () => ({
+  layers: [
+    {
+      source: 'global', label: '~/.claude/settings.json', repoName: null,
+      permissions: { allow: ['Read', 'Glob', 'Grep', 'Bash(npm run *)'], deny: ['Bash(rm -rf *)'] },
+      sandbox: null, skipDangerousMode: false,
+    },
+    {
+      source: 'repo', label: 'webapp/.claude/settings.json', repoName: 'webapp',
+      permissions: { allow: ['Bash(npx prisma *)'], deny: [] },
+      sandbox: { enabled: true, excludedCommands: ['git', 'docker'], network: { allowedDomains: ['api.example.com'], allowLocalBinding: true }, filesystem: { denyRead: ['./secrets/'], denyWrite: ['./.env'] } },
+      skipDangerousMode: false,
+    },
+  ],
+  effectiveAllow: ['Read', 'Glob', 'Grep', 'Bash(npm run *)', 'Bash(npx prisma *)'],
+  effectiveDeny: ['Bash(rm -rf *)'],
+  hasSandbox: true,
+  hasSkipDangerous: false,
+})
+
+// Environment variables
+demoHandlers['/api/env-vars'] = () => ({
+  global: { CLAUDE_AUTOCOMPACT_PCT_OVERRIDE: '50', MAX_THINKING_TOKENS: '16000' },
+  globalLocal: null,
+  repos: [
+    { name: 'webapp', path: '/Users/demo/Documents/GitHub/webapp', env: { NODE_ENV: 'development', DEBUG: 'true' }, envLocal: null },
+  ],
+  totalVars: 4,
+})
+
+// Tasks
+demoHandlers['/api/tasks'] = () => ({
+  groups: [
+    {
+      id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+      subtasks: [
+        { id: '1', subject: 'Set up Clerk authentication provider', description: 'Install @clerk/nextjs and configure environment variables', status: 'completed', blocks: ['2'], blockedBy: [] },
+        { id: '2', subject: 'Replace NextAuth session providers', description: 'Swap out useSession hooks for Clerk equivalents', status: 'completed', blocks: ['3'], blockedBy: ['1'] },
+        { id: '3', subject: 'Update middleware for Clerk auth', description: 'Replace NextAuth middleware with clerkMiddleware()', status: 'in_progress', blocks: [], blockedBy: ['2'] },
+      ]
+    },
+    {
+      id: 'f9e8d7c6-b5a4-3210-fedc-ba0987654321',
+      subtasks: [
+        { id: '1', subject: 'Profile dashboard page load time', description: 'Use Chrome DevTools to identify bottlenecks', status: 'completed', blocks: [], blockedBy: [] },
+        { id: '2', subject: 'Add React.lazy for heavy components', description: 'Code-split chart and table components', status: 'pending', blocks: [], blockedBy: [] },
+      ]
+    },
+  ],
+  totalSubtasks: 5,
+  statusCounts: { completed: 3, in_progress: 1, pending: 1 },
+})
+
+// Plugins (full)
+demoHandlers['/api/plugins-full'] = () => ({
+  installed: {
+    'code-review@claude-plugins-official': [{ scope: 'user', version: 'unknown', installedAt: '2026-03-12T10:00:00Z', lastUpdated: '2026-03-25T14:00:00Z', gitCommitSha: 'abc123' }],
+    'playwright@claude-plugins-official': [{ scope: 'user', version: 'unknown', installedAt: '2026-02-20T09:00:00Z', lastUpdated: '2026-03-15T11:00:00Z', gitCommitSha: 'def456' }],
+    'vercel@claude-plugins-official': [{ scope: 'user', version: 'unknown', installedAt: '2026-02-15T14:30:00Z', lastUpdated: '2026-03-20T16:00:00Z', gitCommitSha: 'ghi789' }],
+    'frontend-design@claude-plugins-official': [{ scope: 'user', version: 'unknown', installedAt: '2026-03-01T08:00:00Z', lastUpdated: '2026-03-28T10:00:00Z', gitCommitSha: 'jkl012' }],
+    'react-native@callstack-agent-skills': [{ scope: 'user', version: 'unknown', installedAt: '2026-03-10T12:00:00Z', lastUpdated: '2026-03-22T09:00:00Z', gitCommitSha: 'mno345' }],
+  },
+  enabled: {
+    'code-review@claude-plugins-official': true,
+    'playwright@claude-plugins-official': true,
+    'vercel@claude-plugins-official': true,
+    'frontend-design@claude-plugins-official': true,
+    'react-native@callstack-agent-skills': true,
+  },
+  blocklist: { plugins: [] },
+  marketplaces: {
+    'claude-plugins-official': { source: { source: 'github', repo: 'anthropics/claude-plugins-official' }, lastUpdated: '2026-04-10T00:00:00Z' },
+  },
+  extraMarketplaces: {
+    'callstack-agent-skills': { source: { source: 'github', repo: 'callstack/claude-agent-skills' } },
+  },
+  totalInstalled: 5,
+  totalMarketplaces: 2,
+})
+
+// Context
+demoHandlers['/api/context'] = () => ({
+  model: 'claude-opus-4-6',
+  effortLevel: 'high',
+  thinkingEnabled: true,
+  env: {
+    CLAUDE_AUTOCOMPACT_PCT_OVERRIDE: '50',
+    MAX_THINKING_TOKENS: '16000',
+    CLAUDE_CODE_MAX_CONTEXT_TOKENS: null,
+    DISABLE_COMPACT: null,
+    DISABLE_PROMPT_CACHING: null,
+  },
+})
+
+// Launch profiles
+demoHandlers['/api/launch-profiles'] = () => ({
+  currentModel: 'claude-opus-4-6',
+  currentPermissions: { allow: ['Read', 'Glob', 'Grep', 'Bash(npm run *)'], deny: ['Bash(rm -rf *)'] },
+  profiles: [
+    { id: 'default', name: 'Default', category: 'Interactive', description: 'Standard interactive mode', command: 'claude' },
+    { id: 'plan', name: 'Plan Mode', category: 'Interactive', description: 'Read-only exploration and planning', command: 'claude --permission-mode plan' },
+    { id: 'accept-edits', name: 'Accept Edits', category: 'Interactive', description: 'Auto-accept file edits, still prompt for Bash', command: 'claude --permission-mode acceptEdits' },
+    { id: 'headless', name: 'Headless', category: 'Automation', description: 'Non-interactive for scripts and CI', command: 'claude -p "your prompt" --output-format json' },
+    { id: 'verbose', name: 'Verbose', category: 'Automation', description: 'Full turn-by-turn logging output', command: 'claude --verbose' },
+    { id: 'opus', name: 'Opus', category: 'Model', description: 'Use Opus for complex reasoning tasks', command: 'claude --model opus' },
+    { id: 'sonnet', name: 'Sonnet', category: 'Model', description: 'Use Sonnet for faster, cheaper execution', command: 'claude --model sonnet' },
+    { id: 'haiku', name: 'Haiku', category: 'Model', description: 'Use Haiku for quick, simple tasks', command: 'claude --model haiku' },
+    { id: 'worktree', name: 'Worktree', category: 'Specialized', description: 'Isolated git worktree for parallel work', command: 'claude --worktree' },
+    { id: 'resume', name: 'Resume', category: 'Session', description: 'Continue the most recent conversation', command: 'claude --continue' },
+    { id: 'budget', name: 'Budget Cap', category: 'Specialized', description: 'Set a maximum spend limit for a session', command: 'claude --max-budget-usd 5.00' },
+    { id: 'max-turns', name: 'Turn Limit', category: 'Specialized', description: 'Limit the number of agentic turns', command: 'claude --max-turns 20' },
+  ],
 })
 
 export { demoHandlers }
