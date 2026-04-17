@@ -3,9 +3,9 @@ import { join } from 'path'
 import { execSync } from 'child_process'
 import os from 'os'
 import fs from 'fs'
-import matter from 'gray-matter'
 import { isMAS, hasRequiredFolders, runSetup, getBasePaths, pickFolder, saveBookmark } from './sandbox.js'
 import { DEMO, demoHandlers } from './demo-data.js'
+import { safeRead, safeJSON, safeMatter, dirs, files, scanGithubRepos as scanReposImpl } from './fs-helpers.js'
 
 // Resolved after setup (or immediately for non-MAS)
 let CLAUDE_DIR
@@ -17,58 +17,7 @@ function initPaths() {
   REPOS_DIR = process.env.REPOS_DIR_OVERRIDE || paths.reposDir || join(os.homedir(), 'Documents', 'GitHub')
 }
 
-function safeRead(filePath) {
-  try { return fs.readFileSync(filePath, 'utf-8') } catch { return null }
-}
-
-function safeJSON(filePath) {
-  try { return JSON.parse(fs.readFileSync(filePath, 'utf-8')) } catch { return null }
-}
-
-function safeMatter(filePath) {
-  try {
-    const raw = fs.readFileSync(filePath, 'utf-8')
-    const { data, content } = matter(raw)
-    return { frontmatter: data, content }
-  } catch { return null }
-}
-
-function dirs(dirPath) {
-  try {
-    return fs.readdirSync(dirPath, { withFileTypes: true })
-      .filter(d => d.isDirectory() && !d.name.startsWith('.'))
-      .map(d => d.name)
-  } catch { return [] }
-}
-
-function files(dirPath, ext) {
-  try {
-    return fs.readdirSync(dirPath)
-      .filter(f => !f.startsWith('.') && (!ext || f.endsWith(ext)))
-  } catch { return [] }
-}
-
-function scanGithubRepos() {
-  const githubDir = REPOS_DIR
-  const repos = []
-  try {
-    const entries = fs.readdirSync(githubDir, { withFileTypes: true })
-      .filter(d => d.isDirectory() && !d.name.startsWith('.'))
-    for (const entry of entries) {
-      const p = join(githubDir, entry.name)
-      try {
-        if (fs.statSync(join(p, '.git')).isDirectory()) repos.push(p)
-      } catch {}
-      try {
-        for (const sub of fs.readdirSync(p, { withFileTypes: true }).filter(d => d.isDirectory() && !d.name.startsWith('.'))) {
-          const sp = join(p, sub.name)
-          try { if (fs.statSync(join(sp, '.git')).isDirectory()) repos.push(sp) } catch {}
-        }
-      } catch {}
-    }
-  } catch {}
-  return repos
-}
+const scanGithubRepos = () => scanReposImpl(REPOS_DIR)
 
 // Overview stats
 ipcMain.handle('/api/overview', () => {

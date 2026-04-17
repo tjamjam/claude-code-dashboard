@@ -9,6 +9,8 @@
     "dev": "electron-vite dev",
     "demo": "DEMO=1 electron-vite dev",
     "build": "electron-vite build",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "package": "npm run build && dotenv -e .env -- electron-builder --mac --x64 --arm64",
     "package:dmg": "npm run build && dotenv -e .env -- electron-builder --mac dmg --universal",
     "package:mas": "npm run build && electron-builder --mac mas"
@@ -20,10 +22,13 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@testing-library/react": "^16.3.2",
     "@vitejs/plugin-react": "^4.3.1",
     "dotenv-cli": "^11.0.0",
     "electron": "^33.0.0",
     "electron-builder": "^25.0.0",
-    "electron-vite": "^2.0.0"
+    "electron-vite": "^2.0.0",
+    "jsdom": "^29.0.2",
+    "vitest": "^4.1.4"
   }
 }

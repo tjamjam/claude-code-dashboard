@@ -1,16 +1,10 @@
 import { useState } from 'react';
 import { useApi } from '../hooks/useApi';
+import { isSensitive } from '../utils/sensitive';
 import PromptCard from './PromptCard';
 import { SectionDivider } from './RepoItemsSection';
 
 const ENV_PROMPT = `Review my Claude Code environment variables across all settings files. Check if there are important env vars I should set, like CLAUDE_AUTOCOMPACT_PCT_OVERRIDE for context management, MAX_THINKING_TOKENS for thinking budget, or project-specific variables. Also check for any sensitive values that should be in settings.local.json instead of settings.json.`;
-
-const SENSITIVE_PATTERNS = ['KEY', 'SECRET', 'TOKEN', 'PASSWORD', 'CREDENTIAL'];
-
-function isSensitive(name) {
-  const upper = name.toUpperCase();
-  return SENSITIVE_PATTERNS.some(p => upper.includes(p));
-}
 
 const WELL_KNOWN_VARS = [
   { name: 'CLAUDE_AUTOCOMPACT_PCT_OVERRIDE', desc: 'Context usage percentage that triggers auto-compaction (default: 80)' },
