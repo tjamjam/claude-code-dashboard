@@ -5,6 +5,7 @@ out/
 *.app
 .DS_Store
 .env
+.playwright-mcp/
 
 # MAS provisioning profile is machine-specific, don't track
 build/embedded.provisionprofile
